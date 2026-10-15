@@ -29,8 +29,6 @@ DATENSCHUTZ
 • Keine Internetberechtigung, keine Werbung, kein Tracking
 • Termininhalte bleiben auf dem Gerät
 
-Hinweis: Die App-Oberfläche ist derzeit auf Englisch.
-
 Open Source unter MIT-Lizenz: https://github.com/Diddlik/family-calender-widget
 
 ## Versionshinweise 0.1.0 (max. 500 Zeichen)

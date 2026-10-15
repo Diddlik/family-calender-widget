@@ -23,6 +23,7 @@ Implemented in 0.1:
 - Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
 - Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
 - Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app, tapping the header reconfigures the widget.
+- English and German UI, following the system language; on Android 13+ the language can also be chosen per app.
 
 Deferred: visual nested rule editor and named reusable filter profiles (0.2), calendar writes (0.3), notifications (0.4).
 

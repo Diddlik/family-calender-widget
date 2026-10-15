@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="permission_rationale">Diese App zeigt anstehende Termine aus Kalendern, die bereits auf diesem Gerät synchronisiert sind. Dafür braucht sie Lesezugriff auf deine Kalender. Die Termindaten bleiben auf dem Gerät.</string>
+    <string name="permission_grant">Kalenderzugriff erlauben</string>
+    <string name="permission_denied">Der Kalenderzugriff wurde abgelehnt. Du kannst ihn in den App-Einstellungen erlauben.</string>
+    <string name="permission_open_settings">App-Einstellungen öffnen</string>
+
+    <string name="main_add_widget">Der Kalenderzugriff ist erlaubt. So fügst du eine Agenda hinzu: Halte eine freie Stelle auf dem Startbildschirm gedrückt, wähle „Widgets“ und dann „Family Calendar Widget“.</string>
+    <string name="about_title">Über die App</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_copyright">© 2026 Pavel Eremeev · MIT-Lizenz</string>
+    <string name="about_privacy">Kein Internetzugriff, keine Analyse, kein Tracking. Kalenderdaten werden nur auf dem Gerät gelesen.</string>
+    <string name="about_credits">Erstellt mit AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin und kotlinx.serialization, alle unter der Apache-Lizenz 2.0.</string>
+
+    <string name="config_title">Agenda einrichten</string>
+    <string name="config_calendars">Kalender</string>
+    <string name="config_no_calendars">Auf diesem Gerät wurden keine Kalender gefunden. Füge in den Systemeinstellungen ein Konto hinzu, synchronisiere dessen Kalender und komm dann zurück.</string>
+    <string name="config_select_calendar">Wähle mindestens einen Kalender aus.</string>
+    <string name="config_keywords">Stichwörter im Titel</string>
+    <string name="config_keywords_label">Stichwörter, durch Kommas getrennt</string>
+    <string name="config_keywords_hint">Zeigt Termine, deren Titel eines der Stichwörter enthält. Leer lassen, um alle Termine anzuzeigen.</string>
+    <string name="config_preset_medical">Vorlage für Arzttermine verwenden</string>
+    <plurals name="config_max_items">
+        <item quantity="one">Bis zu %1$d Termin anzeigen</item>
+        <item quantity="other">Bis zu %1$d Termine anzeigen</item>
+    </plurals>
+    <string name="config_save">Speichern</string>
+
+    <string name="widget_title">Demnächst</string>
+    <string name="widget_description">Anstehende Termine aus ausgewählten Kalendern, gefiltert nach Stichwörtern</string>
+    <string name="widget_not_configured">Tippen, um Kalender auszuwählen</string>
+    <string name="widget_permission_missing">Tippen, um Kalenderzugriff zu erlauben</string>
+    <string name="widget_empty">Keine anstehenden Termine</string>
+    <string name="event_no_title">(Ohne Titel)</string>
+</resources>
