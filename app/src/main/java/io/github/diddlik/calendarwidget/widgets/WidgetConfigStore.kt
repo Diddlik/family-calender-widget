@@ -16,12 +16,19 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 
-/** Configuration of one home-screen widget instance. Event content is never persisted, only references. */
+/**
+ * Configuration of one home-screen widget instance. Event content is never persisted, only references.
+ * New fields need defaults so configurations stored by older versions still decode.
+ */
 @Serializable
 data class WidgetConfig(
     val calendarIds: Set<Long>,
     val filter: FilterDefinition = FilterDefinition(root = titleContainsAny(emptyList())),
     val maxItems: Int = DEFAULT_MAX_ITEMS,
+    /** Shown as the widget header; blank uses the default title. */
+    val name: String = "",
+    /** Display titles written as "<keywords> - <person> <title>" as person and title; see `parseConventionTitle`. */
+    val useNamingConvention: Boolean = false,
 ) {
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
@@ -58,6 +65,8 @@ private object ConfigSerializer : Serializer<StoredConfig> {
 class WidgetConfigStore private constructor(private val store: DataStore<StoredConfig>) {
 
     suspend fun get(appWidgetId: Int): WidgetConfig? = store.data.first().widgets[appWidgetId]
+
+    suspend fun all(): Map<Int, WidgetConfig> = store.data.first().widgets
 
     suspend fun put(appWidgetId: Int, config: WidgetConfig) {
         store.updateData { it.copy(widgets = it.widgets + (appWidgetId to config)) }
