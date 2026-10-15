@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Single-colour silhouette for themed icons: card outline, header and agenda rows. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:strokeColor="#FFFFFF" android:strokeWidth="3" android:pathData="M37,32.5h34a5.5,5.5 0,0 1,5.5 5.5v34a5.5,5.5 0,0 1,-5.5 5.5h-34a5.5,5.5 0,0 1,-5.5 -5.5v-34a5.5,5.5 0,0 1,5.5 -5.5z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M37,31h34a7,7 0,0 1,7 7v4h-48v-4a7,7 0,0 1,7 -7z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M42,27a2,2 0,0 1,2 2v5a2,2 0,0 1,-4 0v-5a2,2 0,0 1,2 -2zM66,27a2,2 0,0 1,2 2v5a2,2 0,0 1,-4 0v-5a2,2 0,0 1,2 -2z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M38,48a2,2 0,0 1,2 2v3a2,2 0,0 1,-4 0v-3a2,2 0,0 1,2 -2zM38,59a2,2 0,0 1,2 2v3a2,2 0,0 1,-4 0v-3a2,2 0,0 1,2 -2zM38,70a2,2 0,0 1,2 2v3a2,2 0,0 1,-4 0v-3a2,2 0,0 1,2 -2z" />
+    <path android:fillColor="#FFFFFF" android:pathData="M44.75,50h24.5a1.75,1.75 0,0 1,0 3.5h-24.5a1.75,1.75 0,0 1,0 -3.5zM44.75,61h18.5a1.75,1.75 0,0 1,0 3.5h-18.5a1.75,1.75 0,0 1,0 -3.5zM44.75,72h21.5a1.75,1.75 0,0 1,0 3.5h-21.5a1.75,1.75 0,0 1,0 -3.5z" />
+</vector>
