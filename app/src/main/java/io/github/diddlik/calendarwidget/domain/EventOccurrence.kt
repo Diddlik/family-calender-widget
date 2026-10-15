@@ -1,7 +1,6 @@
 package io.github.diddlik.calendarwidget.domain
 
 import java.time.Instant
-import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
 
@@ -37,4 +36,4 @@ data class CalendarSource(
  * calendar date in [zone], so an all-day event covers the user's local day, also across DST changes.
  */
 fun allDayToLocal(utcMidnight: Instant, zone: ZoneId): Instant =
-    LocalDate.ofInstant(utcMidnight, ZoneOffset.UTC).atStartOfDay(zone).toInstant()
+    utcMidnight.atOffset(ZoneOffset.UTC).toLocalDate().atStartOfDay(zone).toInstant()

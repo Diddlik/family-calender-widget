@@ -11,7 +11,7 @@ android {
     defaultConfig {
         applicationId = "io.github.diddlik.calendarwidget"
         minSdk = 26
-        targetSdk = 36
+        targetSdk = 37
         // Single source of the app version (Semantic Versioning); shown in the UI via BuildConfig.
         versionCode = 1
         versionName = "0.1.0"

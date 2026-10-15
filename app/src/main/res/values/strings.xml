@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Family Calendar Widget</string>
+
+    <string name="permission_rationale">This app shows upcoming events from calendars that are already synced to this device. It needs read access to your calendars. Event data stays on the device.</string>
+    <string name="permission_grant">Allow calendar access</string>
+    <string name="permission_denied">Calendar access was denied. You can allow it in the app settings.</string>
+    <string name="permission_open_settings">Open app settings</string>
+
+    <string name="main_add_widget">Calendar access is granted. To add an agenda: long-press an empty area of your home screen, choose Widgets, then Family Calendar Widget.</string>
+    <string name="about_title">About</string>
+    <string name="about_version">Version %1$s</string>
+    <string name="about_copyright">© 2026 Pavel Eremeev</string>
+    <string name="about_privacy">No internet access, analytics or tracking. Calendar data is read on the device only.</string>
+    <string name="about_credits">Built with AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin and kotlinx.serialization, all licensed under the Apache License 2.0.</string>
+
+    <string name="config_title">Configure agenda</string>
+    <string name="config_calendars">Calendars</string>
+    <string name="config_no_calendars">No calendars found on this device. Add an account in the system settings and sync its calendars, then come back.</string>
+    <string name="config_select_calendar">Select at least one calendar.</string>
+    <string name="config_keywords">Title keywords</string>
+    <string name="config_keywords_label">Keywords, separated by commas</string>
+    <string name="config_keywords_hint">Shows events whose title contains any keyword. Leave empty to show all events.</string>
+    <string name="config_preset_medical">Use medical appointments preset</string>
+    <plurals name="config_max_items">
+        <item quantity="one">Show up to %1$d event</item>
+        <item quantity="other">Show up to %1$d events</item>
+    </plurals>
+    <string name="config_save">Save</string>
+
+    <string name="widget_title">Upcoming</string>
+    <string name="widget_description">Upcoming events from selected calendars, filtered by keywords</string>
+    <string name="widget_not_configured">Tap to choose calendars</string>
+    <string name="widget_permission_missing">Tap to allow calendar access</string>
+    <string name="widget_empty">No upcoming events</string>
+    <string name="event_no_title">(No title)</string>
+</resources>
