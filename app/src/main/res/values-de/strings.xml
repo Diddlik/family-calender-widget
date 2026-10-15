@@ -32,4 +32,17 @@
     <string name="widget_permission_missing">Tippen, um Kalenderzugriff zu erlauben</string>
     <string name="widget_empty">Keine anstehenden Termine</string>
     <string name="event_no_title">(Ohne Titel)</string>
+    <string name="config_name_label">Name des Widgets</string>
+    <string name="config_account_expand">Kalender von %1$s anzeigen</string>
+    <string name="config_account_collapse">Kalender von %1$s ausblenden</string>
+    <string name="config_convention">Namenskonvention verwenden</string>
+    <string name="config_convention_hint">Titel im Format „Stichwort - Name Titel“, zum Beispiel „Arzt - Anna Vorsorge“, zeigen den Namen und den Titel. Andere Titel werden vollständig angezeigt.</string>
+
+    <string name="main_widgets_title">Deine Widgets</string>
+    <string name="main_widget_not_configured">Noch nicht eingerichtet</string>
+    <plurals name="main_widget_calendars">
+        <item quantity="one">%1$d Kalender</item>
+        <item quantity="other">%1$d Kalender</item>
+    </plurals>
+    <string name="main_widget_edit">Bearbeiten</string>
 </resources>

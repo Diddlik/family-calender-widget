@@ -19,7 +19,9 @@ Milestone 0.1 (read-only agenda widget) in progress. See [requirements](docs/REQ
 
 Implemented in 0.1:
 - `READ_CALENDAR` request with rationale, denial and "open settings" states.
-- Per-widget configuration: calendar selection, title keywords (any match, optional medical preset), item count (1–25, default 10).
+- Per-widget configuration: name shown as the widget header, calendars grouped by account (tree with select-all per account), title keywords (any match, optional medical preset), item count (1–25, default 10).
+- Optional naming convention per widget: titles written as `Keyword - Name Title` (for example `Arzt - Anna Vorsorge`) are filtered by the keyword and displayed as the name plus title; other titles are shown in full.
+- The app lists all placed widgets with an Edit action; widgets can also be reconfigured by tapping their header or via the launcher.
 - Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
 - Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
 - Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app, tapping the header reconfigures the widget.

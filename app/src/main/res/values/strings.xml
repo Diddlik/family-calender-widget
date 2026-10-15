@@ -34,4 +34,17 @@
     <string name="widget_permission_missing">Tap to allow calendar access</string>
     <string name="widget_empty">No upcoming events</string>
     <string name="event_no_title">(No title)</string>
+    <string name="config_name_label">Widget name</string>
+    <string name="config_account_expand">Show calendars of %1$s</string>
+    <string name="config_account_collapse">Hide calendars of %1$s</string>
+    <string name="config_convention">Use naming convention</string>
+    <string name="config_convention_hint">Titles written as “Keyword - Name Title”, for example “Arzt - Anna Checkup”, show the name and the title. Other titles are shown in full.</string>
+
+    <string name="main_widgets_title">Your widgets</string>
+    <string name="main_widget_not_configured">Not set up yet</string>
+    <plurals name="main_widget_calendars">
+        <item quantity="one">%1$d calendar</item>
+        <item quantity="other">%1$d calendars</item>
+    </plurals>
+    <string name="main_widget_edit">Edit</string>
 </resources>

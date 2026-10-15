@@ -1,11 +1,15 @@
 package io.github.diddlik.calendarwidget.ui
 
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -13,14 +17,29 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.diddlik.calendarwidget.BuildConfig
 import io.github.diddlik.calendarwidget.R
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import io.github.diddlik.calendarwidget.widgets.AgendaWidgetReceiver
+import io.github.diddlik.calendarwidget.widgets.WidgetConfig
+import io.github.diddlik.calendarwidget.widgets.WidgetConfigActivity
+import io.github.diddlik.calendarwidget.widgets.WidgetConfigStore
 import io.github.diddlik.calendarwidget.widgets.WidgetRefresh
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3Api::class)
@@ -36,17 +55,59 @@ class MainActivity : ComponentActivity() {
                     ) {
                         // Widgets showing the "permission missing" state need a re-render after the grant.
                         CalendarPermissionGate(onGranted = { WidgetRefresh.refreshNow(this@MainActivity) }) {
-                            Text(
-                                stringResource(R.string.main_add_widget),
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
-                            )
+                            WidgetList()
                         }
                         About()
                     }
                 }
             }
         }
+    }
+}
+
+/** Lists the placed widgets so each can be reconfigured from the app, not only from the home screen. */
+@Composable
+private fun WidgetList() {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var widgets by remember { mutableStateOf<List<Pair<Int, WidgetConfig?>>>(emptyList()) }
+    // Names change in the configuration screen and widgets come and go on the home screen; reload on every return.
+    LifecycleResumeEffect(Unit) {
+        val job = scope.launch {
+            val ids = AppWidgetManager.getInstance(context)
+                .getAppWidgetIds(ComponentName(context, AgendaWidgetReceiver::class.java))
+            val configs = WidgetConfigStore.get(context).all()
+            widgets = ids.map { it to configs[it] }
+        }
+        onPauseOrDispose { job.cancel() }
+    }
+
+    Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (widgets.isNotEmpty()) {
+            Text(stringResource(R.string.main_widgets_title), style = MaterialTheme.typography.titleMedium)
+            widgets.forEach { (appWidgetId, config) ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            config?.name?.ifBlank { null } ?: stringResource(R.string.widget_title),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                        Text(
+                            if (config == null) stringResource(R.string.main_widget_not_configured)
+                            else pluralStringResource(R.plurals.main_widget_calendars, config.calendarIds.size, config.calendarIds.size),
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    TextButton(onClick = {
+                        context.startActivity(
+                            Intent(context, WidgetConfigActivity::class.java)
+                                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        )
+                    }) { Text(stringResource(R.string.main_widget_edit)) }
+                }
+            }
+        }
+        Text(stringResource(R.string.main_add_widget), style = MaterialTheme.typography.bodyLarge)
     }
 }
 

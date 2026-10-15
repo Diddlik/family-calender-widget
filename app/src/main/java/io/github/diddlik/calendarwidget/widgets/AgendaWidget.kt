@@ -49,6 +49,7 @@ import androidx.glance.text.TextStyle
 import io.github.diddlik.calendarwidget.R
 import io.github.diddlik.calendarwidget.calendar.CalendarSourceRepository
 import io.github.diddlik.calendarwidget.domain.EventOccurrence
+import io.github.diddlik.calendarwidget.domain.parseConventionTitle
 import io.github.diddlik.calendarwidget.domain.selectAgenda
 import io.github.diddlik.calendarwidget.ui.MainActivity
 import java.time.Duration
@@ -62,8 +63,8 @@ private val LOOKAHEAD: Duration = Duration.ofDays(366)
 
 private sealed interface AgendaState {
     data object NotConfigured : AgendaState
-    data object PermissionMissing : AgendaState
-    data class Ready(val events: List<EventOccurrence>, val zone: ZoneId) : AgendaState
+    data class PermissionMissing(val config: WidgetConfig) : AgendaState
+    data class Ready(val config: WidgetConfig, val events: List<EventOccurrence>, val zone: ZoneId) : AgendaState
 }
 
 class AgendaWidget : GlanceAppWidget() {
@@ -109,15 +110,15 @@ class AgendaWidget : GlanceAppWidget() {
     private suspend fun loadState(context: Context, appWidgetId: Int): AgendaState {
         val config = WidgetConfigStore.get(context).get(appWidgetId) ?: return AgendaState.NotConfigured
         val repository = CalendarSourceRepository(context)
-        if (!repository.hasPermission()) return AgendaState.PermissionMissing
+        if (!repository.hasPermission()) return AgendaState.PermissionMissing(config)
         val now = Instant.now()
         val zone = ZoneId.systemDefault()
         val occurrences = try {
             repository.occurrences(config.calendarIds, now.minus(Duration.ofDays(1)), now.plus(LOOKAHEAD), zone)
         } catch (_: SecurityException) {
-            return AgendaState.PermissionMissing
+            return AgendaState.PermissionMissing(config)
         }
-        return AgendaState.Ready(selectAgenda(occurrences, config.filter.root, now, config.maxItems), zone)
+        return AgendaState.Ready(config, selectAgenda(occurrences, config.filter.root, now, config.maxItems), zone)
     }
 }
 
@@ -126,15 +127,21 @@ private fun Content(context: Context, state: AgendaState, configure: Action) {
     Column(
         modifier = GlanceModifier.fillMaxSize().background(GlanceTheme.colors.widgetBackground).cornerRadius(16.dp).padding(12.dp),
     ) {
+        val name = when (state) {
+            is AgendaState.Ready -> state.config.name
+            is AgendaState.PermissionMissing -> state.config.name
+            AgendaState.NotConfigured -> ""
+        }
         Text(
-            text = context.getString(R.string.widget_title),
+            text = name.ifBlank { context.getString(R.string.widget_title) },
+            maxLines = 1,
             style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
             modifier = GlanceModifier.fillMaxWidth().clickable(configure),
         )
         Spacer(GlanceModifier.height(8.dp))
         when (state) {
             AgendaState.NotConfigured -> Message(context.getString(R.string.widget_not_configured), configure)
-            AgendaState.PermissionMissing -> Message(
+            is AgendaState.PermissionMissing -> Message(
                 context.getString(R.string.widget_permission_missing),
                 actionStartActivity(Intent(context, MainActivity::class.java)),
             )
@@ -142,7 +149,7 @@ private fun Content(context: Context, state: AgendaState, configure: Action) {
                 if (state.events.isEmpty()) Message(context.getString(R.string.widget_empty), configure)
                 else LazyColumn {
                     items(state.events, itemId = { it.eventId * 31 + it.begin.toEpochMilli() }) { event ->
-                        EventRow(context, event, state.zone)
+                        EventRow(context, event, state.zone, state.config.useNamingConvention)
                     }
                 }
         }
@@ -157,7 +164,7 @@ private fun Message(text: String, onClick: Action) {
 }
 
 @Composable
-private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId) {
+private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId, useNamingConvention: Boolean) {
     Row(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = 4.dp).clickable(actionStartActivity(openEventIntent(event))),
         verticalAlignment = Alignment.CenterVertically,
@@ -173,11 +180,29 @@ private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId) {
                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp),
                 maxLines = 1,
             )
-            Text(
-                text = event.title?.takeIf { it.isNotBlank() } ?: context.getString(R.string.event_no_title),
-                style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp),
-                maxLines = 1,
-            )
+            val convention = if (useNamingConvention) parseConventionTitle(event.title) else null
+            if (convention != null) {
+                Row {
+                    Text(
+                        text = convention.person,
+                        style = TextStyle(color = GlanceTheme.colors.primary, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                        maxLines = 1,
+                    )
+                    if (convention.title.isNotEmpty()) {
+                        Text(
+                            text = "  " + convention.title,
+                            style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp),
+                            maxLines = 1,
+                        )
+                    }
+                }
+            } else {
+                Text(
+                    text = event.title?.takeIf { it.isNotBlank() } ?: context.getString(R.string.event_no_title),
+                    style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp),
+                    maxLines = 1,
+                )
+            }
         }
     }
 }
