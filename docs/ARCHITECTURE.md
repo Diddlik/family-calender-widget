@@ -20,6 +20,11 @@ Offline-first, on-device calendar integration, privacy by design. Separate provi
 - Use Room for relational shared configurations if justified, otherwise DataStore with a serialized model and migration plan. Preferences DataStore alone is not a relational database.
 - Handoff for event create via ACTION_INSERT initially; direct writes must check calendar writable access and handle sync-provider-specific restrictions.
 
+## Decisions (0.1)
+- Widget toolkit: Jetpack Glance 1.2. Its `LazyColumn` provides the scrollable, resizable list and per-item click actions the agenda needs, so no RemoteViews fallback was required.
+- Persistence: DataStore with a versioned JSON model (`StoredConfig`), keyed by `appWidgetId`; filter trees are stored as versioned `FilterDefinition`. Named reusable filter profiles are deferred to 0.2.
+- Refresh: WorkManager content-URI trigger on `CalendarContract.CONTENT_URI` (re-armed after each run), a 15-minute periodic job, and manifest receivers for time, timezone and locale changes.
+
 ## Testing
 Unit tests of pure filter evaluation; repository integration tests with fake source or Robolectric where practical; Android instrumentation test for widget settings; manual device checklist for Android launcher and calendar integration. No private event data in fixtures.
 

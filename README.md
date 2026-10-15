@@ -15,10 +15,48 @@ Build multiple independently configurable home-screen calendar widgets. Each wid
 - Optional reminder profiles and notifications (later milestone).
 
 ## Status
-**Planning / implementation not started.** See [requirements](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [Codex instructions](AGENTS.md).
+Milestone 0.1 (read-only agenda widget) in progress. See [requirements](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [agent instructions](AGENTS.md).
 
-## First milestone
-A runnable Android app with calendar permission handling, calendar selection, pure testable filter engine, and a real home-screen agenda widget for upcoming matching events.
+Implemented in 0.1:
+- `READ_CALENDAR` request with rationale, denial and "open settings" states.
+- Per-widget configuration: calendar selection, title keywords (any match, optional medical preset), item count (1–25, default 10).
+- Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
+- Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
+- Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app, tapping the header reconfigures the widget.
+
+Deferred: visual nested rule editor and named reusable filter profiles (0.2), calendar writes (0.3), notifications (0.4).
+
+## Build and test
+Requirements: JDK 17 or newer (Android Studio's bundled JBR 21 works), Android SDK with platform 37. Gradle is provided by the wrapper.
+
+| Task | Command |
+| --- | --- |
+| Build debug APK | `./gradlew assembleDebug` |
+| Unit tests | `./gradlew testDebugUnitTest` |
+| Lint | `./gradlew lintDebug` |
+| Install on a device | `./gradlew installDebug` |
+
+Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSdk 26. All library versions are pinned in `gradle/libs.versions.toml`.
+
+## Permissions and platform limits
+- Only `READ_CALENDAR`. No `INTERNET`, no `WRITE_CALENDAR`. Event content is read on demand and never stored; only calendar IDs, filters and widget settings are persisted (app-private storage).
+- Only calendars synced onto the device by an account or sync adapter are visible.
+- Refresh: calendar changes trigger an update via a WorkManager content-URI trigger (a few seconds delay); time, timezone and locale changes update immediately; a 15-minute periodic job (the Android minimum) removes finished events. Android may delay background work further under battery saver or Doze, so updates are not to the second.
+- All-day events are shown on their local calendar day and remain visible until that day ends. Ongoing timed events stay visible until they end.
+
+## Manual device checklist
+1. Fresh install, open the app: rationale shown; deny, then deny again: "Open app settings" appears; grant in settings and return: granted state shown.
+2. Add the widget: configuration opens; no calendars selected disables Save; back cancels placement.
+3. Select three calendars, apply the medical preset, save: widget lists only matching events, soonest first, at most the chosen count.
+4. Add a second widget with other calendars or keywords: both widgets show their own results.
+5. Recurring event: each upcoming occurrence appears once with the right date.
+6. All-day event shows a date without time; timed events show date and time.
+7. Edit or add a matching event in the calendar app: widget updates within seconds to minutes.
+8. Wait until an event ends: it disappears within about 15 minutes.
+9. Change the timezone: times update.
+10. Tap an event: the calendar app opens that occurrence. Tap the header: configuration reopens with saved values.
+11. Revoke calendar permission: widget shows "Tap to allow calendar access".
+12. Resize the widget: the list scrolls and nothing is clipped. Check light and dark mode.
 
 ## Contributing
 Use feature branches and pull requests; keep calendar event content on-device. Do not commit real calendar data, screenshots containing sensitive events, credentials, or signing keys.
