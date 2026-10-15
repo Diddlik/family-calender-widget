@@ -14,11 +14,12 @@ class WidgetConfigTest {
         assertEquals(5, config.maxItems)
         assertEquals("", config.name)
         assertEquals(false, config.useNamingConvention)
+        assertEquals(emptySet<Int>(), config.reminderMinutes)
     }
 
     @Test
-    fun `name and naming convention round-trip`() {
-        val config = WidgetConfig(calendarIds = setOf(2), name = "Arzttermine", useNamingConvention = true)
+    fun `name, naming convention and reminders round-trip`() {
+        val config = WidgetConfig(calendarIds = setOf(2), name = "Arzttermine", useNamingConvention = true, reminderMinutes = setOf(60, 1440))
         assertEquals(config, Json.decodeFromString<WidgetConfig>(Json.encodeToString(config)))
     }
 }

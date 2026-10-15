@@ -3,6 +3,10 @@
 
     <!-- Read-only milestone: no WRITE_CALENDAR and no INTERNET. -->
     <uses-permission android:name="android.permission.READ_CALENDAR" />
+    <!-- Optional per-widget reminders; requested only when the user turns one on. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- User-granted on Android 12+; without it reminders use a 10-minute alarm window. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -38,6 +42,10 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/agenda_widget_info" />
         </receiver>
+
+        <receiver
+            android:name=".widgets.ReminderReceiver"
+            android:exported="false" />
 
         <receiver
             android:name=".widgets.TimeChangeReceiver"

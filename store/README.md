@@ -39,4 +39,4 @@ done
   - Data shared: none.
   - Encrypted in transit: not applicable (no transfer).
   - Data deletion request: not applicable (no data collected).
-- **Sensitive permission:** `READ_CALENDAR` is a runtime permission, not a restricted one; no declaration form is needed.
+- **Sensitive permission:** `READ_CALENDAR` is a runtime permission, not a restricted one; no declaration form is needed. `POST_NOTIFICATIONS` and `SCHEDULE_EXACT_ALARM` (user-granted) need no declaration either; the app does not use `USE_EXACT_ALARM`.

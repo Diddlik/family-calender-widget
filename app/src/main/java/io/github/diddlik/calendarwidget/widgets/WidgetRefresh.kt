@@ -1,5 +1,6 @@
 package io.github.diddlik.calendarwidget.widgets
 
+import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit
  * - a calendar content-URI trigger re-renders after calendar edits or syncs,
  * - a 15-minute periodic job (the WorkManager minimum) drops finished events,
  * - time, timezone and locale broadcasts re-render immediately.
+ * Every refresh also posts due reminders (see [ReminderNotifier]).
  */
 object WidgetRefresh {
     private const val PERIODIC = "agenda-periodic"
@@ -67,9 +69,10 @@ object WidgetRefresh {
 
     class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            AgendaWidget.refreshAll(applicationContext)
-            // A content-URI trigger fires once; re-arm it for the next calendar change.
+            // A content-URI trigger fires once; re-arm it first, so a failing refresh cannot end the watch.
             if (CALENDAR_CHANGE in tags) watchCalendarChanges(applicationContext, ExistingWorkPolicy.APPEND_OR_REPLACE)
+            AgendaWidget.refreshAll(applicationContext)
+            ReminderNotifier.check(applicationContext)
             return Result.success()
         }
     }
@@ -80,6 +83,12 @@ class AgendaWidgetReceiver : GlanceAppWidgetReceiver() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
+        WidgetRefresh.schedule(context)
+    }
+
+    // WorkManager jobs are lost on a force stop; re-arm on every widget update (KEEP leaves running jobs alone).
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        super.onUpdate(context, appWidgetManager, appWidgetIds)
         WidgetRefresh.schedule(context)
     }
 

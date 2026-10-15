@@ -78,6 +78,8 @@ private fun WidgetList() {
                 .getAppWidgetIds(ComponentName(context, AgendaWidgetReceiver::class.java))
             val configs = WidgetConfigStore.get(context).all()
             widgets = ids.map { it to configs[it] }
+            // A force stop cancels refresh jobs and reminder alarms; opening the app re-arms them.
+            if (ids.isNotEmpty()) WidgetRefresh.schedule(context)
         }
         onPauseOrDispose { job.cancel() }
     }

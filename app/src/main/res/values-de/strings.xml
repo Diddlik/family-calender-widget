@@ -45,4 +45,29 @@
         <item quantity="other">%1$d Kalender</item>
     </plurals>
     <string name="main_widget_edit">Bearbeiten</string>
+    <string name="widget_edit">Widget bearbeiten</string>
+    <string name="config_reminders">Erinnerungen</string>
+    <string name="config_reminders_hint">Benachrichtigt vor passenden Terminen, unabhängig von den Erinnerungen im Kalender. Ganztägige Termine zählen ab 9:00 Uhr.</string>
+    <string name="config_reminders_blocked">Benachrichtigungen sind für diese App ausgeschaltet, daher können keine Erinnerungen erscheinen.</string>
+    <plurals name="reminder_minutes">
+        <item quantity="one">%1$d Min.</item>
+        <item quantity="other">%1$d Min.</item>
+    </plurals>
+    <plurals name="reminder_hours">
+        <item quantity="one">%1$d Stunde</item>
+        <item quantity="other">%1$d Stunden</item>
+    </plurals>
+    <plurals name="reminder_days">
+        <item quantity="one">%1$d Tag</item>
+        <item quantity="other">%1$d Tage</item>
+    </plurals>
+    <plurals name="reminder_weeks">
+        <item quantity="one">%1$d Woche</item>
+        <item quantity="other">%1$d Wochen</item>
+    </plurals>
+    <string name="config_reminders_inexact">Erinnerungen können bis zu 10 Minuten später kommen. Erlaube Wecker für pünktliche Erinnerungen.</string>
+    <string name="config_reminders_allow_exact">Wecker erlauben</string>
+    <string name="notification_channel_name">Terminerinnerungen</string>
+    <string name="notification_channel_description">Pro Widget eingestellte Erinnerungen</string>
+    <string name="notification_public_title">Anstehender Termin</string>
 </resources>
