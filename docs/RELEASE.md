@@ -58,3 +58,7 @@ While the app has never been reviewed, Google Play accepts only **draft** releas
 Testers accept the opt-in link from Closed testing → Alpha → Testers ("Copy link") once, then install and update the app through the Play Store like any other app.
 
 The workflow filename and concurrency group remain unchanged to preserve run-number version codes and serialize uploads with earlier internal-testing runs. The initial manual upload can still use internal testing; subsequent CI uploads target Alpha. Closed-test updates may require Google review before testers receive them.
+
+## Release notes and versions
+
+Release notes for each upload come from `store/whatsnew/whatsnew-<locale>` (max. 500 characters per language). For a user-visible release, raise `versionName` in `app/build.gradle.kts` and update both files in the same change. The tester opt-in link is `https://play.google.com/apps/testing/io.github.diddlik.calendarwidget`; only accounts on the tester list can join.

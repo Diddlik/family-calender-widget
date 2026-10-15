@@ -6,6 +6,7 @@
 | Feature graphic | `graphics/feature-graphic-de-DE.png`, `graphics/feature-graphic-en-US.png` | 1024 × 500 PNG/JPEG, no alpha |
 | Phone screenshots | `graphics/screenshots/de-DE/`, `graphics/screenshots/en-US/` | 2–8 images per language, 1080 × 2160 (max. aspect ratio 2:1) |
 | Listing texts | `listing/de-DE.md`, `listing/en-US.md` | name ≤ 30, short ≤ 80, full ≤ 4000 characters |
+| Release notes | `whatsnew/whatsnew-de-DE`, `whatsnew/whatsnew-en-US` | ≤ 500 characters; uploaded by the pipeline |
 
 Screenshots were taken on an emulator with synthetic calendars only (German ones via `adb shell cmd locale set-app-locales <package> --locales de-DE`). Never use real family events.
 

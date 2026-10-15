@@ -115,7 +115,7 @@ object ReminderNotifier {
         val notification = NotificationCompat.Builder(context, CHANNEL)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
-            .setContentText(formatWhen(event, zone))
+            .setContentText(formatWhen(context, event, zone))
             .setSubText(config.name.ifBlank { null })
             .setWhen(event.begin.toEpochMilli())
             .setCategory(NotificationCompat.CATEGORY_EVENT)

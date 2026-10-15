@@ -61,6 +61,7 @@ jobs:
           packageName: io.github.diddlik.calendarwidget
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
           track: alpha
+          whatsNewDirectory: store/whatsnew
           # Play only accepts draft releases until the app has passed its first review; then set the variable to "completed".
           status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
 

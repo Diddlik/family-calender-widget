@@ -194,7 +194,7 @@ private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId, use
         Spacer(GlanceModifier.width(8.dp))
         Column(modifier = GlanceModifier.fillMaxHeight()) {
             Text(
-                text = formatWhen(event, zone),
+                text = formatWhen(context, event, zone),
                 style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp),
                 maxLines = 1,
             )
@@ -225,10 +225,16 @@ private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId, use
     }
 }
 
-internal fun formatWhen(event: EventOccurrence, zone: ZoneId): String {
+/**
+ * Formats in the app's language: a process started in the background keeps the system default
+ * locale, while [context] resources follow the per-app language.
+ */
+internal fun formatWhen(context: Context, event: EventOccurrence, zone: ZoneId): String {
+    val locale = context.resources.configuration.locales[0]
     val begin = event.begin.atZone(zone)
-    return if (event.allDay) begin.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
-    else begin.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
+    val formatter = if (event.allDay) DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM)
+    else DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT)
+    return begin.format(formatter.withLocale(locale))
 }
 
 /** Opens the occurrence in the user's calendar app; begin/end select the specific recurrence. */
