@@ -4,10 +4,10 @@
 | --- | --- | --- |
 | App icon | `graphics/play-icon-512.png` | 512 × 512 PNG, 32-bit |
 | Feature graphic | `graphics/feature-graphic-de-DE.png`, `graphics/feature-graphic-en-US.png` | 1024 × 500 PNG/JPEG, no alpha |
-| Phone screenshots | `graphics/screenshots/phone-*.png` | 2–8 images, 1080 × 2160 (max. aspect ratio 2:1) |
+| Phone screenshots | `graphics/screenshots/de-DE/`, `graphics/screenshots/en-US/` | 2–8 images per language, 1080 × 2160 (max. aspect ratio 2:1) |
 | Listing texts | `listing/de-DE.md`, `listing/en-US.md` | name ≤ 30, short ≤ 80, full ≤ 4000 characters |
 
-Screenshots were taken on an emulator with synthetic calendars only. Never use real family events.
+Screenshots were taken on an emulator with synthetic calendars only (German ones via `adb shell cmd locale set-app-locales <package> --locales de-DE`). Never use real family events.
 
 ## Regenerating graphics
 

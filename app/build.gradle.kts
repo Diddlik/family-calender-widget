@@ -41,6 +41,10 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
+    // Lets Android 13+ offer a per-app language choice for the bundled translations.
+    androidResources {
+        generateLocaleConfig = true
+    }
     buildFeatures {
         compose = true
         buildConfig = true

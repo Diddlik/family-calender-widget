@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Family Calendar Widget</string>
+    <string name="app_name" translatable="false">Family Calendar Widget</string>
 
     <string name="permission_rationale">This app shows upcoming events from calendars that are already synced to this device. It needs read access to your calendars. Event data stays on the device.</string>
     <string name="permission_grant">Allow calendar access</string>
