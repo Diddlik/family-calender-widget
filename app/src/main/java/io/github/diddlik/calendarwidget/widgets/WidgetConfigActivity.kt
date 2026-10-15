@@ -167,7 +167,7 @@ class WidgetConfigActivity : ComponentActivity() {
     private suspend fun save(appWidgetId: Int, config: WidgetConfig) {
         WidgetConfigStore.get(this).put(appWidgetId, config)
         WidgetRefresh.schedule(this)
-        AgendaWidget().update(this, GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId))
+        AgendaWidget.refresh(this, GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId))
         setResult(RESULT_OK, resultIntent(appWidgetId))
         finish()
     }

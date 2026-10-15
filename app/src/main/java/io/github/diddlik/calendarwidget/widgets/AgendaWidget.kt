@@ -6,6 +6,11 @@ import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
@@ -23,6 +28,9 @@ import androidx.glance.appwidget.cornerRadius
 import androidx.glance.appwidget.lazy.LazyColumn
 import androidx.glance.appwidget.lazy.items
 import androidx.glance.appwidget.provideContent
+import androidx.glance.appwidget.state.updateAppWidgetState
+import androidx.glance.currentState
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.background
 import androidx.glance.layout.Alignment
 import androidx.glance.layout.Box
@@ -72,9 +80,29 @@ class AgendaWidget : GlanceAppWidget() {
                 .setData("calendarwidget://configure/$appWidgetId".toUri())
         )
         provideContent {
-            GlanceTheme {
-                Content(context, state, configure)
+            // update() on a running session only recomposes; the refresh token makes it reload data too.
+            val token = currentState(REFRESH_TOKEN)
+            var current by remember { mutableStateOf(state) }
+            LaunchedEffect(token) {
+                if (token != null) current = loadState(context, appWidgetId)
             }
+            GlanceTheme {
+                Content(context, current, configure)
+            }
+        }
+    }
+
+    companion object {
+        private val REFRESH_TOKEN = longPreferencesKey("refresh_token")
+
+        /** Reloads calendar data and re-renders the given widget, whether or not its session is running. */
+        suspend fun refresh(context: Context, id: GlanceId) {
+            updateAppWidgetState(context, id) { it[REFRESH_TOKEN] = System.nanoTime() }
+            AgendaWidget().update(context, id)
+        }
+
+        suspend fun refreshAll(context: Context) {
+            GlanceAppWidgetManager(context).getGlanceIds(AgendaWidget::class.java).forEach { refresh(context, it) }
         }
     }
 

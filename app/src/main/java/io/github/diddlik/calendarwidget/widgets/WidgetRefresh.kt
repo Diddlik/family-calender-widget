@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.provider.CalendarContract
 import androidx.glance.appwidget.GlanceAppWidgetReceiver
-import androidx.glance.appwidget.updateAll
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -68,7 +67,7 @@ object WidgetRefresh {
 
     class RefreshWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            AgendaWidget().updateAll(applicationContext)
+            AgendaWidget.refreshAll(applicationContext)
             // A content-URI trigger fires once; re-arm it for the next calendar change.
             if (CALENDAR_CHANGE in tags) watchCalendarChanges(applicationContext, ExistingWorkPolicy.APPEND_OR_REPLACE)
             return Result.success()
