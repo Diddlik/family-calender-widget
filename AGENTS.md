@@ -107,18 +107,18 @@ Design:
 ## Project facts
 
 - Purpose and scope: universal Android calendar widget builder, not a hardcoded medical-appointments app. The first preset covers 3 family calendars filtered by title for medical visits; the core must support arbitrary calendar widgets. Read `README.md`, `docs/REQUIREMENTS.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` before architectural decisions. Current milestone: 0.1 (see `docs/ROADMAP.md`).
-- Primary languages and runtimes: Kotlin, Android SDK. Exact SDK, AGP, Java, and Gradle versions: OPEN until scaffolding; document them when chosen.
-- Platform-specific constraints: on-device only; no remote service, OAuth flow, or `INTERNET` permission in the initial version. Refresh widgets within OS background limits; do not promise immediate updates.
-- GUI toolkit, update mechanism, and distribution: Jetpack Compose for app UI; Jetpack Glance for widgets after verifying current API suitability (fallback RemoteViews, recorded in an ADR). Distribution and update mechanism: OPEN (in-app auto-update conflicts with the no-`INTERNET` rule).
-- Build command: OPEN (no Gradle project yet).
-- Test command: OPEN (no Gradle project yet).
-- Lint and format command: OPEN (no Gradle project yet).
-- Local run command: OPEN (no Gradle project yet).
-- Required environment: Android SDK and JDK. If no Android SDK is available, report explicitly that build and device verification could not be performed.
-- Important entry points: none yet; planned packages are listed in `docs/ARCHITECTURE.md`.
-- Architecture constraints: keep Android data source, pure domain filter engine (no Android dependencies), config persistence, and widget rendering separate. Every widget ID has its own calendars, filters, and limits.
-- Generated files: none yet.
-- Files or directories not to edit manually: none yet.
+- Primary languages and runtimes: Kotlin 2.4, single `:app` module, AGP 9.4 (built-in Kotlin, no `kotlin-android` plugin), Gradle 9.8 wrapper, compileSdk/targetSdk 37, minSdk 26. Versions are pinned in `gradle/libs.versions.toml`.
+- Platform-specific constraints: on-device only; no remote service, OAuth flow, or `INTERNET` permission in the initial version. Refresh widgets within OS background limits; do not promise immediate updates. Check lint `NewApi` findings: `java.time` APIs newer than API 26 are not available without desugaring.
+- GUI toolkit, update mechanism, and distribution: Jetpack Compose (Material 3) for app UI; Jetpack Glance for the widget. Distribution and update mechanism: OPEN (in-app auto-update conflicts with the no-`INTERNET` rule). App license: OPEN (no LICENSE file yet).
+- Build command: `./gradlew assembleDebug`
+- Test command: `./gradlew testDebugUnitTest`
+- Lint and format command: `./gradlew lintDebug` (no formatter configured).
+- Local run command: `./gradlew installDebug`, then add the widget from the launcher.
+- Required environment: JDK 17+ (Android Studio JBR 21 works; set `JAVA_HOME`), Android SDK with platform 37. If no Android SDK is available, report explicitly that build and device verification could not be performed.
+- Important entry points: `ui/MainActivity` (launcher, permission, About), `widgets/WidgetConfigActivity` (per-widget configuration), `widgets/AgendaWidget` (Glance rendering), `widgets/WidgetRefresh` (receivers and WorkManager refresh), `filter/` and `domain/` (pure Kotlin engine with unit tests).
+- Architecture constraints: keep Android data source, pure domain filter engine (no Android dependencies), config persistence, and widget rendering separate. Every widget ID has its own calendars, filters, and limits. Widget data must load inside Glance composition keyed on the refresh token (`AgendaWidget.refresh`), because `update()` on a running Glance session only recomposes.
+- Generated files: `build/` outputs only.
+- Files or directories not to edit manually: `gradle/wrapper/` (regenerate with `./gradlew wrapper --gradle-version <version>`).
 
 ## Project rules
 
