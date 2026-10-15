@@ -32,6 +32,6 @@ DATENSCHUTZ
 
 Open Source unter MIT-Lizenz: https://github.com/Diddlik/family-calender-widget
 
-## Versionshinweise 0.1.0 (max. 500 Zeichen)
+## Versionshinweise
 
-Erste Testversion: Agenda-Widget mit Kalenderauswahl, Stichwortfilter, Vorlage für Arzttermine und automatischer Aktualisierung.
+Stehen in `store/whatsnew/whatsnew-de-DE` und werden von der Pipeline mit jedem Release hochgeladen (max. 500 Zeichen).

@@ -1,74 +1,92 @@
-# Family Calendar Widget
+<p align="center">
+  <img src="store/graphics/feature-graphic-en-US.png" alt="Family Calendar Widget – your family's next events at a glance" width="720">
+</p>
 
-An Android-first, privacy-conscious, universal calendar widget builder.
+<h1 align="center">Family Calendar Widget</h1>
 
-## Vision
-Build multiple independently configurable home-screen calendar widgets. Each widget selects calendar sources, applies reusable filter profiles, and renders an agenda. First scenario: the next 5–10 family medical appointments across three synced calendars; the architecture is **not** limited to medical appointments.
+<p align="center">
+  <b>The appointments that matter, right on your home screen.</b><br>
+  Pick your family's calendars, choose what to show, and never miss the next doctor's visit again.
+</p>
 
-## Planned capabilities
-- Read calendars already synchronized with Android (Google Calendar, CalDAV/Nextcloud via a sync adapter, etc.).
-- Select one or more calendars per widget.
-- Reusable, composable filter rules (AND / OR / NOT).
-- Title/description/location text predicates, keyword inclusion/exclusion, date ranges, calendar membership and other supported fields.
-- Chronological, scrollable agenda, widget-specific themes and item counts.
-- Tap an event to open details; optional quick-create using the selected writable calendar (later milestone).
-- Optional reminder profiles and notifications (later milestone).
+<p align="center">
+  <a href="https://github.com/Diddlik/family-calender-widget/actions/workflows/android.yml"><img src="https://github.com/Diddlik/family-calender-widget/actions/workflows/android.yml/badge.svg" alt="Build"></a>
+  <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white" alt="Android 8.0+">
+  <img src="https://img.shields.io/badge/Google%20Play-closed%20testing-414141?logo=googleplay&logoColor=white" alt="Google Play closed testing">
+  <img src="https://img.shields.io/badge/privacy-no%20internet%20access-1E5AA8" alt="No internet access">
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-MIT-F2B134" alt="MIT License"></a>
+</p>
 
-## Status
-Milestone 0.1 (read-only agenda widget) in progress. See [requirements](docs/REQUIREMENTS.md), [architecture](docs/ARCHITECTURE.md), [roadmap](docs/ROADMAP.md) and [agent instructions](AGENTS.md).
+<p align="center">
+  <img src="store/graphics/screenshots/en-US/phone-1-widget.png" width="200" alt="Widget on the home screen">
+  <img src="store/graphics/screenshots/en-US/phone-2-widget-dark.png" width="200" alt="Widget in dark mode">
+  <img src="store/graphics/screenshots/en-US/phone-4-reminders.png" width="200" alt="Reminder settings">
+  <img src="store/graphics/screenshots/en-US/phone-5-reminder.png" width="200" alt="Reminder notification">
+</p>
 
-Implemented in 0.1:
-- `READ_CALENDAR` request with rationale, denial and "open settings" states.
-- Per-widget configuration: name shown as the widget header, calendars grouped by account (tree with select-all per account), title keywords (any match, optional medical preset), item count (1–25, default 10).
-- Optional naming convention per widget: titles written as `Keyword - Name Title` (for example `Arzt - Anna Vorsorge`) are filtered by the keyword and displayed as the name plus title; other titles are shown in full.
-- The app lists all placed widgets with an Edit action; on the home screen each widget has an edit (pencil) button in its header.
-- Optional reminders per widget (15 min to 1 week before; several can be combined), independent of the reminders stored in the calendar. All-day events count back from 09:00 on their day. Notifications show the event title only when the device is unlocked.
-- Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
-- Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
-- Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app, tapping the header reconfigures the widget.
-- English and German UI, following the system language; on Android 13+ the language can also be chosen per app.
+---
 
-Deferred: visual nested rule editor and named reusable filter profiles (0.2), calendar writes (0.3), reminder profiles beyond per-widget offsets (0.4).
+## ✨ Why
 
-## Build and test
-Requirements: JDK 17 or newer (Android Studio's bundled JBR 21 works), Android SDK with platform 37. Gradle is provided by the wrapper.
+Family calendars get busy: school, sports, birthdays, and somewhere in between the appointments you really can't miss. **Family Calendar Widget** turns the calendars already on your phone into small, focused lists on your home screen. One widget for the kids' doctor visits, another for school, one more for the whole family. Each shows only what you asked for.
 
-| Task | Command |
+## 🧩 What it does
+
+| | |
 | --- | --- |
-| Build debug APK | `./gradlew assembleDebug` |
-| Unit tests | `./gradlew testDebugUnitTest` |
-| Lint | `./gradlew lintDebug` |
-| Install on a device | `./gradlew installDebug` |
-| Signed release bundle | `./gradlew bundleRelease` (signing via environment variables, see [release guide](docs/RELEASE.md)) |
+| 📅 **Your calendars, combined** | Works with every calendar on your phone (Google, Nextcloud and more). Choose several per widget, neatly grouped by account. |
+| 🔎 **Only what matters** | Show events whose title contains your keywords, or use the ready-made preset for doctor's appointments. |
+| 🧱 **As many widgets as you like** | Every widget has its own name, calendars, keywords and length. |
+| 👤 **Who is it for?** | Write titles like `Doctor - Anna Check-up` and the widget shows **Anna** with *Check-up*: the keyword is for filtering, the name stands out. |
+| 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. |
+| ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. |
+| ⚡ **Always up to date** | Changes in your calendar show up within seconds; past events disappear on their own. |
+| 🌗 **Feels at home** | Resizable, light and dark mode, English and German. |
 
-Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSdk 26. All library versions are pinned in `gradle/libs.versions.toml`.
+## 🚀 Get started in three steps
 
-## Permissions and platform limits
-- `READ_CALENDAR`; `POST_NOTIFICATIONS` (Android 13+, requested only when a reminder is turned on); `SCHEDULE_EXACT_ALARM` (optional, user-granted "Alarms & reminders"; without it reminders may arrive up to 10 minutes late). No `INTERNET`, no `WRITE_CALENDAR`. Event content is read on demand and never stored; only calendar IDs, filters and widget settings are persisted (app-private storage).
-- Only calendars synced onto the device by an account or sync adapter are visible.
-- Refresh: calendar changes on the device trigger an update via a WorkManager content-URI trigger (a few seconds delay); time, timezone and locale changes update immediately; a 15-minute periodic job (the Android minimum) removes finished events and catches up missed reminders. Changes made elsewhere (for example on the web) appear once the account has synced them to the device. Android may delay background work further under battery saver or Doze, and a force stop pauses refresh and reminders until the app is opened again.
-- All-day events are shown on their local calendar day and remain visible until that day ends. Ongoing timed events stay visible until they end.
+1. **Install** the app and allow it to read your calendars.
+2. **Add the widget**: long-press your home screen → *Widgets* → *Family Calendar Widget*.
+3. **Choose** calendars, keywords and reminders, then tap *Save*. Done.
 
-## Manual device checklist
-1. Fresh install, open the app: rationale shown; deny, then deny again: "Open app settings" appears; grant in settings and return: granted state shown.
-2. Add the widget: configuration opens; no calendars selected disables Save; back cancels placement.
-3. Select three calendars, apply the medical preset, save: widget lists only matching events, soonest first, at most the chosen count.
-4. Add a second widget with other calendars or keywords: both widgets show their own results.
-5. Recurring event: each upcoming occurrence appears once with the right date.
-6. All-day event shows a date without time; timed events show date and time.
-7. Edit or add a matching event in the calendar app: widget updates within seconds to minutes.
-8. Wait until an event ends: it disappears within about 15 minutes.
-9. Change the timezone: times update.
-10. Tap an event: the calendar app opens that occurrence. Tap the pencil in the header: configuration reopens with saved values.
-11. Revoke calendar permission: widget shows "Tap to allow calendar access".
-12. Resize the widget: the list scrolls and nothing is clipped. Check light and dark mode.
-13. Turn on a 15-minute reminder (allow notifications), add a matching event starting in 16 minutes: a notification appears about a minute later; the lock screen shows only "Upcoming event". Without "Alarms & reminders" the configuration shows a hint and the reminder may come up to 10 minutes late.
+<p align="center">
+  <img src="store/graphics/screenshots/en-US/phone-3-configure.png" width="200" alt="Choosing calendars">
+  <img src="store/graphics/screenshots/en-US/phone-6-app.png" width="200" alt="All widgets in the app">
+</p>
 
-## Contributing
-Use feature branches and pull requests; keep calendar event content on-device. Do not commit real calendar data, screenshots containing sensitive events, credentials, or signing keys.
+## 🔒 Private by design
 
-## Privacy and license
-Privacy policy: https://diddlik.github.io/family-calender-widget/privacy/ (source: `docs/privacy/index.html`). Licensed under the [MIT License](LICENSE).
+- **No internet access at all.** The app cannot send your data anywhere.
+- **No ads, no tracking, no analytics.**
+- Events are read on your phone when needed and never stored by the app.
+- Reminders on the lock screen only say *"Upcoming event"*, never the title.
 
-## Repository
-https://github.com/Diddlik/family-calender-widget
+Read the full [privacy policy](https://diddlik.github.io/family-calender-widget/privacy/).
+
+## 📲 Get the app
+
+Family Calendar Widget is in **closed testing on Google Play**. Android 8.0 or newer is required.
+
+<p align="center">
+  <a href="https://play.google.com/apps/testing/io.github.diddlik.calendarwidget"><img src="https://img.shields.io/badge/Join%20the%20test-on%20Google%20Play-1E5AA8?style=for-the-badge&logo=googleplay&logoColor=white" alt="Join the test on Google Play"></a>
+</p>
+
+1. **Ask to join:** send the email address of your Google account to [digiwo@gmail.com](mailto:digiwo@gmail.com?subject=Family%20Calendar%20Widget%20tester). Only invited accounts can take part in the test.
+2. **Accept the invitation:** open the [tester link](https://play.google.com/apps/testing/io.github.diddlik.calendarwidget) with that account and tap *Become a tester*.
+3. **Install** the app from Google Play. Updates arrive automatically like for any other app.
+
+## 🗺️ What's next
+
+- 🎨 Themes, colours and layouts per widget
+- 🧠 A visual editor for advanced filters and reusable filter profiles
+- ➕ Quick-add of new events from the widget
+
+See the [roadmap](docs/ROADMAP.md) for details.
+
+## 🛠️ For developers
+
+Built with Kotlin, Jetpack Compose and Jetpack Glance. Build commands, permissions, platform limits and the test checklist are in [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md); the release pipeline is described in [docs/RELEASE.md](docs/RELEASE.md).
+
+## 📄 License
+
+[MIT](LICENSE) © 2026 Pavel Eremeev

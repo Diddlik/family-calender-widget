@@ -32,6 +32,6 @@ PRIVACY
 
 Open source under the MIT License: https://github.com/Diddlik/family-calender-widget
 
-## Release notes 0.1.0 (max. 500 characters)
+## Release notes
 
-First test release: agenda widget with calendar selection, keyword filter, medical appointments preset and automatic refresh.
+Kept in `store/whatsnew/whatsnew-en-US` and uploaded by the pipeline with every release (max. 500 characters).
