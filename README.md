@@ -62,5 +62,8 @@ Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSd
 ## Contributing
 Use feature branches and pull requests; keep calendar event content on-device. Do not commit real calendar data, screenshots containing sensitive events, credentials, or signing keys.
 
+## Privacy and license
+Privacy policy: https://diddlik.github.io/family-calender-widget/privacy/ (source: `docs/privacy/index.html`). Licensed under the [MIT License](LICENSE).
+
 ## Repository
 https://github.com/Diddlik/family-calender-widget

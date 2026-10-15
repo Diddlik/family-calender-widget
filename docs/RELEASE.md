@@ -17,7 +17,7 @@ Store `upload.jks` and both passwords in a password manager. Google Play App Sig
 ### 2. Create the app in the Play Console
 
 1. Play Console → Create app: name "Family Calendar Widget", app, free.
-2. Complete the required setup tasks under "Set up your app": privacy policy URL, app access, ads (none), content rating, target audience, data safety (calendar data is read on the device, not collected or shared).
+2. Complete the required setup tasks under "Set up your app". The answers, the privacy policy URL, listing texts and all graphics are in [`store/`](../store/README.md).
 3. Testing → Internal testing → Testers: create an email list and add the testers.
 
 ### 3. First upload by hand
