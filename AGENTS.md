@@ -109,7 +109,7 @@ Design:
 - Purpose and scope: universal Android calendar widget builder, not a hardcoded medical-appointments app. The first preset covers 3 family calendars filtered by title for medical visits; the core must support arbitrary calendar widgets. Read `README.md`, `docs/REQUIREMENTS.md`, `docs/ARCHITECTURE.md`, and `docs/ROADMAP.md` before architectural decisions. Current milestone: 0.1 (see `docs/ROADMAP.md`).
 - Primary languages and runtimes: Kotlin 2.4, single `:app` module, AGP 9.4 (built-in Kotlin, no `kotlin-android` plugin), Gradle 9.8 wrapper, compileSdk/targetSdk 37, minSdk 26. Versions are pinned in `gradle/libs.versions.toml`.
 - Platform-specific constraints: on-device only; no remote service, OAuth flow, or `INTERNET` permission in the initial version. Refresh widgets within OS background limits; do not promise immediate updates. Check lint `NewApi` findings: `java.time` APIs newer than API 26 are not available without desugaring.
-- GUI toolkit, update mechanism, and distribution: Jetpack Compose (Material 3) for app UI; Jetpack Glance for the widget. Distribution and updates: Google Play internal testing; every push to `main` uploads a signed bundle via `.github/workflows/play-internal.yml` (setup in `docs/RELEASE.md`). Play Store updates replace an in-app updater, so the app needs no `INTERNET` permission. Application ID `io.github.diddlik.calendarwidget` is final. App license: OPEN (no LICENSE file yet).
+- GUI toolkit, update mechanism, and distribution: Jetpack Compose (Material 3) for app UI; Jetpack Glance for the widget. Distribution and updates: Google Play internal testing; every push to `main` uploads a signed bundle via `.github/workflows/play-internal.yml` (setup in `docs/RELEASE.md`). Play Store updates replace an in-app updater, so the app needs no `INTERNET` permission. Application ID `io.github.diddlik.calendarwidget` is final. License: MIT (`LICENSE`).
 - Build command: `./gradlew assembleDebug`
 - Test command: `./gradlew testDebugUnitTest`
 - Lint and format command: `./gradlew lintDebug` (no formatter configured).
@@ -117,7 +117,7 @@ Design:
 - Required environment: JDK 17+ (Android Studio JBR 21 works; set `JAVA_HOME`), Android SDK with platform 37. If no Android SDK is available, report explicitly that build and device verification could not be performed.
 - Important entry points: `ui/MainActivity` (launcher, permission, About), `widgets/WidgetConfigActivity` (per-widget configuration), `widgets/AgendaWidget` (Glance rendering), `widgets/WidgetRefresh` (receivers and WorkManager refresh), `filter/` and `domain/` (pure Kotlin engine with unit tests).
 - Architecture constraints: keep Android data source, pure domain filter engine (no Android dependencies), config persistence, and widget rendering separate. Every widget ID has its own calendars, filters, and limits. Widget data must load inside Glance composition keyed on the refresh token (`AgendaWidget.refresh`), because `update()` on a running Glance session only recomposes.
-- Generated files: `build/` outputs only.
+- Generated files: `build/` outputs; PNGs in `store/graphics/` are rendered from the SVG sources there (see `store/README.md`).
 - Files or directories not to edit manually: `gradle/wrapper/` (regenerate with `./gradlew wrapper --gradle-version <version>`).
 
 ## Project rules

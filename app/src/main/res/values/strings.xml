@@ -10,7 +10,7 @@
     <string name="main_add_widget">Calendar access is granted. To add an agenda: long-press an empty area of your home screen, choose Widgets, then Family Calendar Widget.</string>
     <string name="about_title">About</string>
     <string name="about_version">Version %1$s</string>
-    <string name="about_copyright">© 2026 Pavel Eremeev</string>
+    <string name="about_copyright">© 2026 Pavel Eremeev · MIT License</string>
     <string name="about_privacy">No internet access, analytics or tracking. Calendar data is read on the device only.</string>
     <string name="about_credits">Built with AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin and kotlinx.serialization, all licensed under the Apache License 2.0.</string>
 
