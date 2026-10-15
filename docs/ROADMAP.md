@@ -11,7 +11,7 @@
 
 ## 0.2 Filter editor and widget customization
 - Visual nested rule editor, reusable named filter profiles, calendar group shortcuts.
-- Widget theme, color, density, count, multiple layout presets, empty/error states.
+- Done: widget theme, background opacity, density, count, list and by-day layouts, empty/error states. Open: custom accent color.
 - More advanced field operators; optional guarded regex after security/performance assessment.
 
 ## 0.3 Quick event creation

@@ -39,6 +39,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -79,9 +82,10 @@ import io.github.diddlik.calendarwidget.filter.titleKeywordsOf
 import io.github.diddlik.calendarwidget.ui.AppTheme
 import io.github.diddlik.calendarwidget.ui.CalendarPermissionGate
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** Configures one widget instance: name, calendar sources, title keywords, title display, item count and reminders. */
+/** Configures one widget instance: name, calendar sources, title keywords, title display, item count, reminders and appearance. */
 class WidgetConfigActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -120,6 +124,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
+        var appearance by remember { mutableStateOf(Appearance()) }
 
         LaunchedEffect(appWidgetId) {
             val existing = store.get(appWidgetId)
@@ -130,6 +135,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
                 reminderMinutes = existing.reminderMinutes
+                appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density)
             }
             calendars = repository.calendars()
         }
@@ -195,6 +201,8 @@ class WidgetConfigActivity : ComponentActivity() {
 
             Reminders(reminderMinutes) { reminderMinutes = it }
 
+            AppearanceSection(appearance) { appearance = it }
+
             if (selected.isEmpty()) {
                 Text(stringResource(R.string.config_select_calendar), style = MaterialTheme.typography.bodyMedium)
             }
@@ -209,6 +217,10 @@ class WidgetConfigActivity : ComponentActivity() {
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,
+                        theme = appearance.theme,
+                        backgroundOpacity = appearance.backgroundOpacity,
+                        layout = appearance.layout,
+                        density = appearance.density,
                     )
                     scope.launch { save(appWidgetId, config) }
                 },
@@ -292,6 +304,69 @@ private fun reminderLabel(minutes: Int): String = when {
     minutes % MINUTES_PER_DAY == 0 -> (minutes / MINUTES_PER_DAY).let { pluralStringResource(R.plurals.reminder_days, it, it) }
     minutes % 60 == 0 -> (minutes / 60).let { pluralStringResource(R.plurals.reminder_hours, it, it) }
     else -> pluralStringResource(R.plurals.reminder_minutes, minutes, minutes)
+}
+
+private data class Appearance(
+    val theme: WidgetTheme = WidgetTheme.SYSTEM,
+    val backgroundOpacity: Int = 100,
+    val layout: WidgetLayout = WidgetLayout.LIST,
+    val density: WidgetDensity = WidgetDensity.COMFORTABLE,
+)
+
+@Composable
+private fun AppearanceSection(appearance: Appearance, onChange: (Appearance) -> Unit) {
+    Text(stringResource(R.string.config_appearance), style = MaterialTheme.typography.titleMedium)
+    Choice(
+        R.string.config_theme,
+        WidgetTheme.entries,
+        appearance.theme,
+        {
+            stringResource(
+                when (it) {
+                    WidgetTheme.SYSTEM -> R.string.config_theme_system
+                    WidgetTheme.LIGHT -> R.string.config_theme_light
+                    WidgetTheme.DARK -> R.string.config_theme_dark
+                }
+            )
+        },
+    ) { onChange(appearance.copy(theme = it)) }
+    Choice(
+        R.string.config_background,
+        WidgetConfig.BACKGROUND_OPACITY_OPTIONS,
+        // A stored value outside the options shows as the closest one.
+        WidgetConfig.BACKGROUND_OPACITY_OPTIONS.minBy { abs(it - appearance.backgroundOpacity) },
+        { stringResource(R.string.config_background_percent, it) },
+    ) { onChange(appearance.copy(backgroundOpacity = it)) }
+    Choice(
+        R.string.config_layout,
+        WidgetLayout.entries,
+        appearance.layout,
+        { stringResource(if (it == WidgetLayout.LIST) R.string.config_layout_list else R.string.config_layout_by_day) },
+    ) { onChange(appearance.copy(layout = it)) }
+    Choice(
+        R.string.config_density,
+        WidgetDensity.entries,
+        appearance.density,
+        { stringResource(if (it == WidgetDensity.COMFORTABLE) R.string.config_density_comfortable else R.string.config_density_compact) },
+    ) { onChange(appearance.copy(density = it)) }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> Choice(title: Int, options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(title), style = MaterialTheme.typography.bodyMedium)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { index, option ->
+                SegmentedButton(
+                    selected = option == selected,
+                    onClick = { onSelect(option) },
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                    label = { Text(label(option), maxLines = 1) },
+                )
+            }
+        }
+    }
 }
 
 /** Calendars grouped by account; an account checkbox selects or clears all of its calendars. */

@@ -31,13 +31,30 @@ data class WidgetConfig(
     val useNamingConvention: Boolean = false,
     /** Notifications before matching events, in minutes, independent of the reminders stored in the calendar. */
     val reminderMinutes: Set<Int> = emptySet(),
+    val theme: WidgetTheme = WidgetTheme.SYSTEM,
+    /** Background opacity in percent, one of [BACKGROUND_OPACITY_OPTIONS]. */
+    val backgroundOpacity: Int = 100,
+    val layout: WidgetLayout = WidgetLayout.LIST,
+    val density: WidgetDensity = WidgetDensity.COMFORTABLE,
 ) {
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
         const val MAX_ITEMS_LIMIT = 25
         val REMINDER_OPTIONS = listOf(15, 30, 60, 120, 24 * 60, 2 * 24 * 60, 7 * 24 * 60)
+        val BACKGROUND_OPACITY_OPTIONS = listOf(100, 75, 50, 25)
     }
 }
+
+@Serializable
+enum class WidgetTheme { SYSTEM, LIGHT, DARK }
+
+/** [BY_DAY] shows a header per day and only the time on each row. */
+@Serializable
+enum class WidgetLayout { LIST, BY_DAY }
+
+/** [COMPACT] puts time and title on one line. */
+@Serializable
+enum class WidgetDensity { COMFORTABLE, COMPACT }
 
 /** Versioned root of all persisted settings. Bump [version] and migrate in [ConfigSerializer] on schema changes. */
 @Serializable

@@ -72,4 +72,22 @@
     <string name="notification_channel_name">Event reminders</string>
     <string name="notification_channel_description">Reminders configured per widget</string>
     <string name="notification_public_title">Upcoming event</string>
+
+    <string name="widget_load_failed">Could not read your calendars. Tap to try again.</string>
+    <string name="widget_today">Today</string>
+    <string name="widget_tomorrow">Tomorrow</string>
+    <string name="widget_all_day">All day</string>
+    <string name="config_appearance">Appearance</string>
+    <string name="config_theme">Theme</string>
+    <string name="config_theme_system">System</string>
+    <string name="config_theme_light">Light</string>
+    <string name="config_theme_dark">Dark</string>
+    <string name="config_background">Background</string>
+    <string name="config_background_percent">%1$d%%</string>
+    <string name="config_layout">Layout</string>
+    <string name="config_layout_list">List</string>
+    <string name="config_layout_by_day">By day</string>
+    <string name="config_density">Density</string>
+    <string name="config_density_comfortable">Comfortable</string>
+    <string name="config_density_compact">Compact</string>
 </resources>

@@ -70,4 +70,22 @@
     <string name="notification_channel_name">Terminerinnerungen</string>
     <string name="notification_channel_description">Pro Widget eingestellte Erinnerungen</string>
     <string name="notification_public_title">Anstehender Termin</string>
+
+    <string name="widget_load_failed">Kalender konnten nicht gelesen werden. Tippen, um es erneut zu versuchen.</string>
+    <string name="widget_today">Heute</string>
+    <string name="widget_tomorrow">Morgen</string>
+    <string name="widget_all_day">Ganztägig</string>
+    <string name="config_appearance">Darstellung</string>
+    <string name="config_theme">Design</string>
+    <string name="config_theme_system">System</string>
+    <string name="config_theme_light">Hell</string>
+    <string name="config_theme_dark">Dunkel</string>
+    <string name="config_background">Hintergrund</string>
+    <string name="config_background_percent">%1$d %%</string>
+    <string name="config_layout">Layout</string>
+    <string name="config_layout_list">Liste</string>
+    <string name="config_layout_by_day">Nach Tagen</string>
+    <string name="config_density">Dichte</string>
+    <string name="config_density_comfortable">Normal</string>
+    <string name="config_density_compact">Kompakt</string>
 </resources>

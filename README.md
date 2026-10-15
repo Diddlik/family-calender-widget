@@ -41,7 +41,8 @@ Family calendars get busy: school, sports, birthdays, and somewhere in between t
 | 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. |
 | ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. |
 | ⚡ **Always up to date** | Changes in your calendar show up within seconds; past events disappear on their own. |
-| 🌗 **Feels at home** | Resizable, light and dark mode, English and German. |
+| 🎨 **Your look** | Light, dark or system theme, see-through background, a compact view and a day-by-day layout, per widget. |
+| 🌗 **Feels at home** | Resizable, follows your wallpaper colours, English and German. |
 
 ## 🚀 Get started in three steps
 
@@ -77,7 +78,6 @@ Family Calendar Widget is in **closed testing on Google Play**. Android 8.0 or n
 
 ## 🗺️ What's next
 
-- 🎨 Themes, colours and layouts per widget
 - 🧠 A visual editor for advanced filters and reusable filter profiles
 - ➕ Quick-add of new events from the widget
 

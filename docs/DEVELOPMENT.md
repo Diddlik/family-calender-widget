@@ -26,9 +26,10 @@ Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSd
 - Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
 - Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
 - Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app.
+- Appearance per widget: theme (system, light, dark; wallpaper colors on Android 12+, applied on the next refresh after a wallpaper change), background opacity (100/75/50/25 %), layout (list, or grouped by day with Today/Tomorrow headers) and density (comfortable, or compact with time and title on one line). If the calendar provider fails, the widget shows an error with tap-to-retry.
 - English and German UI, following the system language; on Android 13+ the language can also be chosen per app. Dates use the app language, also when formatted in the background.
 
-Deferred: visual nested rule editor and named reusable filter profiles (0.2), calendar writes (0.3), reminder profiles beyond per-widget offsets (0.4).
+Deferred: visual nested rule editor, named reusable filter profiles, calendar group shortcuts, advanced operators and a custom accent color (0.2), calendar writes (0.3), reminder profiles beyond per-widget offsets (0.4).
 
 ## Permissions and platform limits
 
@@ -52,6 +53,7 @@ Deferred: visual nested rule editor and named reusable filter profiles (0.2), ca
 11. Revoke calendar permission: widget shows "Tap to allow calendar access".
 12. Resize the widget: the list scrolls and nothing is clipped. Check light and dark mode.
 13. Turn on a 15-minute reminder (allow notifications), add a matching event starting in 16 minutes: a notification appears about a minute later; the lock screen shows only "Upcoming event". Without "Alarms & reminders" the configuration shows a hint and the reminder may come up to 10 minutes late.
+14. Appearance: set the theme to Dark while the system is light (and the reverse): the widget follows the setting, not the system. Background 25 %: the wallpaper shows through and the text stays readable. "By day": Today/Tomorrow/date headers with times only; all-day events show "All day". "Compact": time and title on one line.
 
 ## Contributing
 
