@@ -35,6 +35,7 @@ Requirements: JDK 17 or newer (Android Studio's bundled JBR 21 works), Android S
 | Unit tests | `./gradlew testDebugUnitTest` |
 | Lint | `./gradlew lintDebug` |
 | Install on a device | `./gradlew installDebug` |
+| Signed release bundle | `./gradlew bundleRelease` (signing via environment variables, see [release guide](docs/RELEASE.md)) |
 
 Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSdk 26. All library versions are pinned in `gradle/libs.versions.toml`.
 

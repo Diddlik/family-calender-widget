@@ -13,13 +13,28 @@ android {
         minSdk = 26
         targetSdk = 37
         // Single source of the app version (Semantic Versioning); shown in the UI via BuildConfig.
-        versionCode = 1
         versionName = "0.1.0"
+        // Google Play rejects reused version codes, so CI passes its increasing run number.
+        versionCode = providers.gradleProperty("versionCode").map(String::toInt).getOrElse(1)
+    }
+
+    // The upload key is supplied by CI through environment variables and never stored in the repository.
+    val signingStoreFile = providers.environmentVariable("SIGNING_STORE_FILE").orNull
+    signingConfigs {
+        if (signingStoreFile != null) {
+            create("upload") {
+                storeFile = file(signingStoreFile)
+                storePassword = providers.environmentVariable("SIGNING_STORE_PASSWORD").get()
+                keyAlias = providers.environmentVariable("SIGNING_KEY_ALIAS").get()
+                keyPassword = providers.environmentVariable("SIGNING_KEY_PASSWORD").get()
+            }
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.findByName("upload")
         }
     }
     compileOptions {
