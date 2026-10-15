@@ -19,6 +19,7 @@ FEATURES
 • Preset for medical appointments (German keywords Arzt, Praxis, Impfung) or your own keywords
 • Recurring events shown as individual occurrences, all-day events with their date
 • Cancelled and declined events are hidden
+• Optional reminders per widget, independent of the reminders in your calendar
 • Tap an event to open it in your calendar app
 • Updates on calendar changes and removes past events
 • Resizable, light and dark mode

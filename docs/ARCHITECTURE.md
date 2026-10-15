@@ -23,7 +23,8 @@ Offline-first, on-device calendar integration, privacy by design. Separate provi
 ## Decisions (0.1)
 - Widget toolkit: Jetpack Glance 1.2. Its `LazyColumn` provides the scrollable, resizable list and per-item click actions the agenda needs, so no RemoteViews fallback was required.
 - Persistence: DataStore with a versioned JSON model (`StoredConfig`), keyed by `appWidgetId`; filter trees are stored as versioned `FilterDefinition`. Named reusable filter profiles are deferred to 0.2.
-- Refresh: WorkManager content-URI trigger on `CalendarContract.CONTENT_URI` (re-armed after each run), a 15-minute periodic job, and manifest receivers for time, timezone and locale changes.
+- Refresh: WorkManager content-URI trigger on `CalendarContract.CONTENT_URI` (re-armed at the start of each run), a 15-minute periodic job, and manifest receivers for time, timezone and locale changes. Jobs are re-armed on every widget update and when the app opens, because a force stop cancels them.
+- Reminders (pulled forward from 0.4 as per-widget offsets): `domain/Reminders` computes reminder times (pure, tested); `widgets/ReminderNotifier` posts reminders due since the last check and sets one alarm for the next. Exact alarms when the user grants "Alarms & reminders", otherwise a 10-minute `setWindow`; every refresh also checks, which covers reboots and cleared alarms. `USE_EXACT_ALARM` is not used because Play restricts it to alarm-clock and calendar apps.
 
 ## Testing
 Unit tests of pure filter evaluation; repository integration tests with fake source or Robolectric where practical; Android instrumentation test for widget settings; manual device checklist for Android launcher and calendar integration. No private event data in fixtures.

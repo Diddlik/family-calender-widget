@@ -47,4 +47,29 @@
         <item quantity="other">%1$d calendars</item>
     </plurals>
     <string name="main_widget_edit">Edit</string>
+    <string name="widget_edit">Edit widget</string>
+    <string name="config_reminders">Reminders</string>
+    <string name="config_reminders_hint">Notifies before matching events, independent of the reminders set in the calendar. All-day events count from 9:00.</string>
+    <string name="config_reminders_blocked">Notifications are turned off for this app, so reminders cannot be shown.</string>
+    <plurals name="reminder_minutes">
+        <item quantity="one">%1$d min</item>
+        <item quantity="other">%1$d min</item>
+    </plurals>
+    <plurals name="reminder_hours">
+        <item quantity="one">%1$d hour</item>
+        <item quantity="other">%1$d hours</item>
+    </plurals>
+    <plurals name="reminder_days">
+        <item quantity="one">%1$d day</item>
+        <item quantity="other">%1$d days</item>
+    </plurals>
+    <plurals name="reminder_weeks">
+        <item quantity="one">%1$d week</item>
+        <item quantity="other">%1$d weeks</item>
+    </plurals>
+    <string name="config_reminders_inexact">Reminders may arrive up to 10 minutes late. Allow alarms for on-time reminders.</string>
+    <string name="config_reminders_allow_exact">Allow alarms</string>
+    <string name="notification_channel_name">Event reminders</string>
+    <string name="notification_channel_description">Reminders configured per widget</string>
+    <string name="notification_public_title">Upcoming event</string>
 </resources>

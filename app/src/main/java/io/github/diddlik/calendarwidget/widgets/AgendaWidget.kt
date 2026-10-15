@@ -17,7 +17,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
+import androidx.glance.ColorFilter
 import androidx.glance.GlanceTheme
+import androidx.glance.Image
+import androidx.glance.ImageProvider
 import androidx.glance.action.Action
 import androidx.glance.action.clickable
 import androidx.glance.appwidget.GlanceAppWidget
@@ -42,6 +45,7 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
+import androidx.glance.layout.size
 import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
@@ -132,13 +136,27 @@ private fun Content(context: Context, state: AgendaState, configure: Action) {
             is AgendaState.PermissionMissing -> state.config.name
             AgendaState.NotConfigured -> ""
         }
-        Text(
-            text = name.ifBlank { context.getString(R.string.widget_title) },
-            maxLines = 1,
-            style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
-            modifier = GlanceModifier.fillMaxWidth().clickable(configure),
-        )
-        Spacer(GlanceModifier.height(8.dp))
+        Row(modifier = GlanceModifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = name.ifBlank { context.getString(R.string.widget_title) },
+                maxLines = 1,
+                style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
+                modifier = GlanceModifier.defaultWeight().clickable(configure),
+            )
+            // A visible edit action; tapping the name alone was not discoverable.
+            Box(
+                modifier = GlanceModifier.size(36.dp).cornerRadius(18.dp).clickable(configure),
+                contentAlignment = Alignment.Center,
+            ) {
+                Image(
+                    provider = ImageProvider(R.drawable.ic_widget_edit),
+                    contentDescription = context.getString(R.string.widget_edit),
+                    colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
+                    modifier = GlanceModifier.size(20.dp),
+                )
+            }
+        }
+        Spacer(GlanceModifier.height(4.dp))
         when (state) {
             AgendaState.NotConfigured -> Message(context.getString(R.string.widget_not_configured), configure)
             is AgendaState.PermissionMissing -> Message(
@@ -207,14 +225,14 @@ private fun EventRow(context: Context, event: EventOccurrence, zone: ZoneId, use
     }
 }
 
-private fun formatWhen(event: EventOccurrence, zone: ZoneId): String {
+internal fun formatWhen(event: EventOccurrence, zone: ZoneId): String {
     val begin = event.begin.atZone(zone)
     return if (event.allDay) begin.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM))
     else begin.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT))
 }
 
 /** Opens the occurrence in the user's calendar app; begin/end select the specific recurrence. */
-private fun openEventIntent(event: EventOccurrence): Intent =
+internal fun openEventIntent(event: EventOccurrence): Intent =
     Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.eventId))
         .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin.toEpochMilli())
         .putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end.toEpochMilli())

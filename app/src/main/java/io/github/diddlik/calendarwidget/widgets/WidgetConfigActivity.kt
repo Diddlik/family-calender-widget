@@ -1,15 +1,22 @@
 package io.github.diddlik.calendarwidget.widgets
 
+import android.Manifest
 import android.appwidget.AppWidgetManager
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +33,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -49,6 +57,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.LifecycleResumeEffect
+import androidx.core.net.toUri
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -56,6 +67,7 @@ import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
+import androidx.core.app.NotificationManagerCompat
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import io.github.diddlik.calendarwidget.R
 import io.github.diddlik.calendarwidget.calendar.CalendarSourceRepository
@@ -69,7 +81,7 @@ import io.github.diddlik.calendarwidget.ui.CalendarPermissionGate
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
-/** Configures one widget instance: name, calendar sources, title keywords, title display and item count. */
+/** Configures one widget instance: name, calendar sources, title keywords, title display, item count and reminders. */
 class WidgetConfigActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -107,6 +119,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var keywords by remember { mutableStateOf("") }
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
+        var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
 
         LaunchedEffect(appWidgetId) {
             val existing = store.get(appWidgetId)
@@ -116,6 +129,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 keywords = titleKeywordsOf(existing.filter.root).orEmpty().joinToString(", ")
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
+                reminderMinutes = existing.reminderMinutes
             }
             calendars = repository.calendars()
         }
@@ -179,6 +193,8 @@ class WidgetConfigActivity : ComponentActivity() {
                 steps = WidgetConfig.MAX_ITEMS_LIMIT - 2,
             )
 
+            Reminders(reminderMinutes) { reminderMinutes = it }
+
             if (selected.isEmpty()) {
                 Text(stringResource(R.string.config_select_calendar), style = MaterialTheme.typography.bodyMedium)
             }
@@ -192,6 +208,7 @@ class WidgetConfigActivity : ComponentActivity() {
                         maxItems = count,
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
+                        reminderMinutes = reminderMinutes,
                     )
                     scope.launch { save(appWidgetId, config) }
                 },
@@ -204,11 +221,77 @@ class WidgetConfigActivity : ComponentActivity() {
         WidgetConfigStore.get(this).put(appWidgetId, config)
         WidgetRefresh.schedule(this)
         AgendaWidget.refresh(this, GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId))
+        ReminderNotifier.check(this)
         setResult(RESULT_OK, resultIntent(appWidgetId))
         finish()
     }
 
     private fun resultIntent(appWidgetId: Int) = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+}
+
+/** Reminder offsets as toggle chips; turning one on asks for the notification permission where needed. */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun Reminders(minutes: Set<Int>, onChange: (Set<Int>) -> Unit) {
+    val context = LocalContext.current
+    var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    var exactAlarms by remember { mutableStateOf(ReminderNotifier.canScheduleExactAlarms(context)) }
+    val permission = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
+        notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+    }
+    // Both settings can change in the system settings screens opened below.
+    LifecycleResumeEffect(Unit) {
+        notificationsEnabled = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        exactAlarms = ReminderNotifier.canScheduleExactAlarms(context)
+        onPauseOrDispose {}
+    }
+    Text(stringResource(R.string.config_reminders), style = MaterialTheme.typography.titleMedium)
+    Text(stringResource(R.string.config_reminders_hint), style = MaterialTheme.typography.bodySmall)
+    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+        WidgetConfig.REMINDER_OPTIONS.forEach { option ->
+            val checked = option in minutes
+            FilterChip(
+                selected = checked,
+                onClick = {
+                    if (!checked && !notificationsEnabled && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        permission.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    }
+                    onChange(if (checked) minutes - option else minutes + option)
+                },
+                label = { Text(reminderLabel(option)) },
+            )
+        }
+    }
+    if (minutes.isNotEmpty() && !notificationsEnabled) {
+        Text(
+            stringResource(R.string.config_reminders_blocked),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+        )
+        TextButton(onClick = {
+            context.startActivity(
+                Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+            )
+        }) { Text(stringResource(R.string.permission_open_settings)) }
+    } else if (minutes.isNotEmpty() && !exactAlarms && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        Text(stringResource(R.string.config_reminders_inexact), style = MaterialTheme.typography.bodyMedium)
+        TextButton(onClick = {
+            context.startActivity(
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM, "package:${context.packageName}".toUri())
+            )
+        }) { Text(stringResource(R.string.config_reminders_allow_exact)) }
+    }
+}
+
+private const val MINUTES_PER_DAY = 24 * 60
+private const val MINUTES_PER_WEEK = 7 * MINUTES_PER_DAY
+
+@Composable
+private fun reminderLabel(minutes: Int): String = when {
+    minutes % MINUTES_PER_WEEK == 0 -> (minutes / MINUTES_PER_WEEK).let { pluralStringResource(R.plurals.reminder_weeks, it, it) }
+    minutes % MINUTES_PER_DAY == 0 -> (minutes / MINUTES_PER_DAY).let { pluralStringResource(R.plurals.reminder_days, it, it) }
+    minutes % 60 == 0 -> (minutes / 60).let { pluralStringResource(R.plurals.reminder_hours, it, it) }
+    else -> pluralStringResource(R.plurals.reminder_minutes, minutes, minutes)
 }
 
 /** Calendars grouped by account; an account checkbox selects or clears all of its calendars. */

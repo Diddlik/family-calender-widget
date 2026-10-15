@@ -29,10 +29,13 @@ data class WidgetConfig(
     val name: String = "",
     /** Display titles written as "<keywords> - <person> <title>" as person and title; see `parseConventionTitle`. */
     val useNamingConvention: Boolean = false,
+    /** Notifications before matching events, in minutes, independent of the reminders stored in the calendar. */
+    val reminderMinutes: Set<Int> = emptySet(),
 ) {
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
         const val MAX_ITEMS_LIMIT = 25
+        val REMINDER_OPTIONS = listOf(15, 30, 60, 120, 24 * 60, 2 * 24 * 60, 7 * 24 * 60)
     }
 }
 

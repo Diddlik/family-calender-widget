@@ -20,6 +20,7 @@
 - Editing, recurrence and organizer semantics carefully handled.
 
 ## 0.4 Notifications
+- Done early: per-widget reminder offsets with notification channel, permission handling and exact/inexact alarms.
 - Reminder profiles, notification channel/settings, permission handling, heads-up notification behavior and scheduled reminders with Android limitations.
 
 ## Suggested first Codex task

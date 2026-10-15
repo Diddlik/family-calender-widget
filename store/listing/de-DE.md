@@ -19,6 +19,7 @@ FUNKTIONEN
 • Vorlage für Arzttermine (Arzt, Praxis, Impfung) – oder eigene Stichwörter
 • Wiederkehrende Termine werden korrekt einzeln angezeigt, Ganztagstermine mit Datum
 • Abgesagte und abgelehnte Termine werden ausgeblendet
+• Optionale Erinnerungen pro Widget, unabhängig von den Erinnerungen im Kalender
 • Ein Tipp auf einen Termin öffnet ihn in deiner Kalender-App
 • Aktualisiert sich bei Kalenderänderungen und entfernt vergangene Termine
 • Größe frei anpassbar, heller und dunkler Modus
