@@ -1,4 +1,4 @@
-name: Google Play internal testing
+name: Google Play closed testing
 
 on:
   push:
@@ -53,14 +53,14 @@ jobs:
           name: app-release-${{ github.run_number }}
           path: app/build/outputs/bundle/release/app-release.aab
 
-      - name: Upload to internal testing
+      - name: Upload to closed testing (Alpha)
         if: env.HAS_PLAY_SECRETS == 'true'
         uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
         with:
           serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
           packageName: io.github.diddlik.calendarwidget
           releaseFiles: app/build/outputs/bundle/release/app-release.aab
-          track: internal
+          track: alpha
           # Play only accepts draft releases until the app has passed its first review; then set the variable to "completed".
           status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
 
