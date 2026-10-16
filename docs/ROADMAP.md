@@ -10,9 +10,9 @@
 - Provide manual test instructions and basic GitHub Actions Android build if feasible.
 
 ## 0.2 Filter editor and widget customization
-- Done in 0.3.0: visual nested rule editor. Open: reusable named filter profiles, calendar group shortcuts.
+- Done in 0.3.0: visual nested rule editor. Done in 0.4.0: reusable named filter profiles, calendar group shortcuts.
 - Done: widget theme, background opacity, density, count, list and by-day layouts, empty/error states, accent color.
-- More advanced field operators; optional guarded regex after security/performance assessment.
+- Done in 0.4.0: date-range rule (starts within N days) and regex matching with RE2/J (linear time, length limit, invalid patterns ignored).
 
 ## 0.3 Quick event creation
 - Plus button opens activity; select writable calendar; create via system calendar handoff.

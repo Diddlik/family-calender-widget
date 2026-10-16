@@ -24,13 +24,16 @@ Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSd
 - The app lists all placed widgets with an Edit action; on the home screen each widget has an edit (pencil) button in its header.
 - Optional reminders per widget (15 min to 1 week before; several can be combined), independent of the reminders stored in the calendar. All-day events count back from 09:00 on their day. Notifications show the event title only when the device is unlocked.
 - Pure Kotlin filter engine: versioned JSON tree with ALL / ANY / NOT, calendar, text, time and all-day predicates.
-- Visual filter editor per widget: groups where all, at least one or no rule must match, nested up to two levels; text rules (title, description or location; contains, does not contain, starts with, is exactly) and all-day rules. Text rules without text and groups left empty are dropped on save; no rules shows all events. The medical preset fills the editor with title contains Arzt / Praxis / Impfung.
+- Visual filter editor per widget: groups where all, at least one or no rule must match, nested up to two levels; text rules (title, description or location; contains, does not contain, starts with, is exactly, matches pattern), all-day rules and date-range rules (starts within the next 1 to 365 days; ongoing events count). Text rules without text, patterns that are invalid or longer than 200 characters, and groups left empty are dropped on save; no rules shows all events. The medical preset fills the editor with title contains Arzt / Praxis / Impfung.
+- Patterns use RE2/J syntax (no backreferences or lookaround), ignore case, and run in linear time, so a pathological pattern cannot stall a refresh. The platform regex engine (ICU on Android) backtracks and cannot be interrupted, which is why it is not used.
+- Filter profiles: "Save as profile" stores the current filter under a name; widgets linked to a profile share it, and saving any of them updates the profile and every linked widget. Each widget keeps a copy of the filter, so deleting a profile leaves its widgets unchanged.
+- Calendar groups: "Save selection as group" stores the selected calendars under a name; applying a group replaces the selection once (no link) and skips calendars no longer on the device.
 - Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
 - Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app.
-- Appearance per widget: theme (system, light, dark; wallpaper colors on Android 12+, applied on the next refresh after a wallpaper change), background opacity (100/75/50/25 %), layout (list, or grouped by day with Today/Tomorrow headers) density (comfortable, or compact with time and title on one line) and accent color for day headers and highlighted names (system or one of five fixed colors with a light and a dark tone, each at least 4.5:1 against the default widget background). If the calendar provider fails, the widget shows an error with tap-to-retry.
+- Appearance per widget: theme (system, light, dark; wallpaper colors on Android 12+, applied on the next refresh after a wallpaper change), background opacity (100/75/50/25 %), layout (list, or grouped by day with Today/Tomorrow headers), density (comfortable, or compact with time and title on one line) and accent color for day headers and highlighted names (system or one of five fixed colors with a light and a dark tone, each at least 4.5:1 against the default widget background). If the calendar provider fails, the widget shows an error with tap-to-retry.
 - English and German UI, following the system language; on Android 13+ the language can also be chosen per app. Dates use the app language, also when formatted in the background.
 
-Deferred: named reusable filter profiles, calendar group shortcuts, date-range rules in the editor and regular expressions (0.2), calendar writes (0.3), reminder profiles beyond per-widget offsets (0.4).
+Deferred: calendar writes (0.3), reminder profiles beyond per-widget offsets (0.4).
 
 ## Permissions and platform limits
 
@@ -56,6 +59,9 @@ Deferred: named reusable filter profiles, calendar group shortcuts, date-range r
 13. Turn on a 15-minute reminder (allow notifications), add a matching event starting in 16 minutes: a notification appears about a minute later; the lock screen shows only "Upcoming event". Without "Alarms & reminders" the configuration shows a hint and the reminder may come up to 10 minutes late.
 14. Appearance: set the theme to Dark while the system is light (and the reverse): the widget follows the setting, not the system. Background 25 %: the wallpaper shows through and the text stays readable. "By day": Today/Tomorrow/date headers with times only; all-day events show "All day". "Compact": time and title on one line. Accent Green: day headers and highlighted names turn green in light and dark theme.
 15. Filter editor: add a text rule "Title contains Arzt" and a group "No rule may match" with "Title contains abgesagt", save: only matching, not cancelled events show. Reopen: the same rules appear. Add a text rule without text and save: it is ignored. Delete all rules: all events show.
+16. Pattern rule `^(arzt|praxis)`: matching titles show regardless of case. Type `(`: the field shows "Invalid pattern". Date range "Starts within 7 days": only events of the next week show.
+17. Save a filter as profile in widget A, link widget B to it, change the filter in B and save: A shows the new results too. Delete the profile: both widgets keep their filter.
+18. Save a calendar selection as group, open another widget, apply the group: exactly those calendars are selected.
 
 ## Contributing
 

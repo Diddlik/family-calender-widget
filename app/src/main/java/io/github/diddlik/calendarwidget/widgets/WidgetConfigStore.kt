@@ -37,6 +37,8 @@ data class WidgetConfig(
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
     val accent: WidgetAccent = WidgetAccent.SYSTEM,
+    /** Key in [StoredConfig.profiles] whose filter this widget shares; [filter] then holds a copy of it. */
+    val profileId: String? = null,
 ) {
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
@@ -76,7 +78,40 @@ enum class WidgetAccent(val light: Long?, val dark: Long?) {
 data class StoredConfig(
     val version: Int = 1,
     val widgets: Map<Int, WidgetConfig> = emptyMap(),
-)
+    val profiles: Map<String, FilterProfile> = emptyMap(),
+    val calendarGroups: Map<String, CalendarGroup> = emptyMap(),
+) {
+    /**
+     * Saves [config]; a linked profile takes over its filter and passes it on to every widget sharing it.
+     * Copying the filter into each widget keeps rendering and reminders independent of profiles.
+     */
+    fun withWidget(appWidgetId: Int, config: WidgetConfig): StoredConfig {
+        val id = config.profileId
+        val profile = id?.let { profiles[it] }
+        // The profile may have been deleted while this widget was being edited.
+        if (id == null || profile == null) return copy(widgets = widgets + (appWidgetId to config.copy(profileId = null)))
+        return copy(
+            widgets = (widgets + (appWidgetId to config)).mapValues { (_, widget) ->
+                if (widget.profileId == id) widget.copy(filter = config.filter) else widget
+            },
+            profiles = profiles + (id to profile.copy(filter = config.filter)),
+        )
+    }
+
+    /** Widgets that used the profile keep its filter as their own. */
+    fun withoutProfile(id: String) = copy(
+        profiles = profiles - id,
+        widgets = widgets.mapValues { (_, widget) -> if (widget.profileId == id) widget.copy(profileId = null) else widget },
+    )
+}
+
+/** A named filter that several widgets can share. */
+@Serializable
+data class FilterProfile(val name: String, val filter: FilterDefinition)
+
+/** A named selection of calendars, applied to a widget as a shortcut and not linked afterwards. */
+@Serializable
+data class CalendarGroup(val name: String, val calendarIds: Set<Long>)
 
 private val json = Json { ignoreUnknownKeys = true }
 
@@ -103,8 +138,26 @@ class WidgetConfigStore private constructor(private val store: DataStore<StoredC
 
     suspend fun all(): Map<Int, WidgetConfig> = store.data.first().widgets
 
+    suspend fun stored(): StoredConfig = store.data.first()
+
     suspend fun put(appWidgetId: Int, config: WidgetConfig) {
-        store.updateData { it.copy(widgets = it.widgets + (appWidgetId to config)) }
+        store.updateData { it.withWidget(appWidgetId, config) }
+    }
+
+    suspend fun putProfile(id: String, profile: FilterProfile) {
+        store.updateData { it.copy(profiles = it.profiles + (id to profile)) }
+    }
+
+    suspend fun removeProfile(id: String) {
+        store.updateData { it.withoutProfile(id) }
+    }
+
+    suspend fun putCalendarGroup(id: String, group: CalendarGroup) {
+        store.updateData { it.copy(calendarGroups = it.calendarGroups + (id to group)) }
+    }
+
+    suspend fun removeCalendarGroup(id: String) {
+        store.updateData { it.copy(calendarGroups = it.calendarGroups - id) }
     }
 
     suspend fun remove(appWidgetIds: IntArray) {

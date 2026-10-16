@@ -7,7 +7,6 @@ Offline-first, on-device calendar integration, privacy by design. Separate provi
 - `calendar/CalendarSourceRepository`: available calendars via CalendarContract.Calendars and expanded occurrences via CalendarContract.Instances. Calendar permissions, CalendarContract query columns, cancellation and pagination/chunking.
 - `domain/EventOccurrence`: stable event ID, occurrence begin/end, title, description, location, all-day, calendar ID, display color, provider flags. Do not conflate event ID with recurrence instance identity.
 - `filter/FilterEvaluator`: pure Kotlin evaluator of versioned predicate tree. Inject clock and ZoneId for deterministic tests.
-- `profiles/`: persistent filter profiles, editing and migrations.
 - `widgets/`: map Android widget ID -> configuration (sources, filter profile ID, item limit, presentation settings), rendering and update scheduler.
 - `ui/`: Compose screens for onboarding, calendar picker, filter profile management and widget configuration.
 - `events/`: an abstraction for future event create/edit actions. MVP supports read and opening events, NOT writes.
@@ -22,7 +21,7 @@ Offline-first, on-device calendar integration, privacy by design. Separate provi
 
 ## Decisions (0.1)
 - Widget toolkit: Jetpack Glance 1.2. Its `LazyColumn` provides the scrollable, resizable list and per-item click actions the agenda needs, so no RemoteViews fallback was required.
-- Persistence: DataStore with a versioned JSON model (`StoredConfig`), keyed by `appWidgetId`; filter trees are stored as versioned `FilterDefinition`. Named reusable filter profiles are deferred to 0.2.
+- Persistence: DataStore with a versioned JSON model (`StoredConfig`), keyed by `appWidgetId`; filter trees are stored as versioned `FilterDefinition`. Named filter profiles and calendar groups live in `StoredConfig` too; a widget linked to a profile stores its ID and a copy of the filter, which saving propagates to every linked widget, so rendering and reminders never resolve profiles.
 - Refresh: WorkManager content-URI trigger on `CalendarContract.CONTENT_URI` (re-armed at the start of each run), a 15-minute periodic job, and manifest receivers for time, timezone and locale changes. Jobs are re-armed on every widget update and when the app opens, because a force stop cancels them.
 - Reminders (pulled forward from 0.4 as per-widget offsets): `domain/Reminders` computes reminder times (pure, tested); `widgets/ReminderNotifier` posts reminders due since the last check and sets one alarm for the next. Exact alarms when the user grants "Alarms & reminders", otherwise a 10-minute `setWindow`; every refresh also checks, which covers reboots and cleared alarms. `USE_EXACT_ALARM` is not used because Play restricts it to alarm-clock and calendar apps.
 

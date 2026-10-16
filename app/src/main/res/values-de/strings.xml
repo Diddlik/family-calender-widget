@@ -10,7 +10,7 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_copyright">© 2026 Pavel Eremeev · MIT-Lizenz</string>
     <string name="about_privacy">Kein Internetzugriff, keine Analyse, kein Tracking. Kalenderdaten werden nur auf dem Gerät gelesen.</string>
-    <string name="about_credits">Erstellt mit AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin und kotlinx.serialization, alle unter der Apache-Lizenz 2.0.</string>
+    <string name="about_credits">Erstellt mit AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin und kotlinx.serialization, alle unter der Apache-Lizenz 2.0, sowie RE2/J (Google, BSD-3-Clause-Lizenz).</string>
 
     <string name="config_title">Agenda einrichten</string>
     <string name="config_calendars">Kalender</string>
@@ -37,6 +37,30 @@
     <string name="filter_add_group">Gruppe</string>
     <string name="filter_remove">Entfernen</string>
     <string name="filter_unsupported">Diese Regel lässt sich hier nicht bearbeiten.</string>
+    <string name="config_group_apply">Kalendergruppen</string>
+    <string name="config_group_save">Auswahl als Gruppe speichern</string>
+    <string name="config_group_new">Neue Kalendergruppe</string>
+    <string name="config_profile">Filterprofil</string>
+    <string name="config_profile_none">Kein Profil (nur dieses Widget)</string>
+    <string name="config_profile_shared">Geteiltes Profil: Änderungen gelten für alle Widgets, die es nutzen.</string>
+    <string name="config_profile_save">Als Profil speichern</string>
+    <string name="config_profile_new">Neues Filterprofil</string>
+    <string name="config_delete_named">%1$s löschen</string>
+    <string name="config_name_field">Name</string>
+    <string name="config_cancel">Abbrechen</string>
+    <string name="filter_op_matches">passt zu Muster</string>
+    <string name="filter_pattern">Regulärer Ausdruck</string>
+    <string name="filter_regex_hint">Ohne Groß-/Kleinschreibung, zum Beispiel ^(Arzt|Zahnarzt)</string>
+    <string name="filter_regex_invalid">Ungültiges Muster; diese Regel wird ignoriert.</string>
+    <plurals name="filter_regex_too_long">
+        <item quantity="one">Höchstens %1$d Zeichen; diese Regel wird ignoriert.</item>
+        <item quantity="other">Höchstens %1$d Zeichen; diese Regel wird ignoriert.</item>
+    </plurals>
+    <string name="filter_add_within_days">Zeitraum</string>
+    <plurals name="filter_within_days">
+        <item quantity="one">Beginnt innerhalb von %d Tag</item>
+        <item quantity="other">Beginnt innerhalb von %d Tagen</item>
+    </plurals>
     <string name="config_preset_medical">Vorlage für Arzttermine verwenden</string>
     <plurals name="config_max_items">
         <item quantity="one">Bis zu %1$d Termin anzeigen</item>

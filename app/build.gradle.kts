@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.re2j)
 
     testImplementation(libs.junit)
 }

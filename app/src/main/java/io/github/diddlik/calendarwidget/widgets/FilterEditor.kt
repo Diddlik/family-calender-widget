@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import io.github.diddlik.calendarwidget.R
@@ -39,6 +40,10 @@ import io.github.diddlik.calendarwidget.filter.All
 import io.github.diddlik.calendarwidget.filter.AllDay
 import io.github.diddlik.calendarwidget.filter.AnyOf
 import io.github.diddlik.calendarwidget.filter.FilterNode
+import io.github.diddlik.calendarwidget.filter.MAX_REGEX_LENGTH
+import io.github.diddlik.calendarwidget.filter.RegexProblem
+import io.github.diddlik.calendarwidget.filter.StartsWithinDays
+import io.github.diddlik.calendarwidget.filter.regexProblem
 import io.github.diddlik.calendarwidget.filter.Not
 import io.github.diddlik.calendarwidget.filter.TextField
 import io.github.diddlik.calendarwidget.filter.TextMatch
@@ -46,6 +51,8 @@ import io.github.diddlik.calendarwidget.filter.TextOperator
 
 /** Deeper nesting leaves too little width for a rule on a phone. */
 private const val MAX_GROUP_DEPTH = 2
+
+private val WITHIN_DAYS_OPTIONS = listOf(1, 3, 7, 14, 30, 90, 365)
 
 /** [NONE] is stored as NOT(ANY), so a NOT group always has exactly one child. */
 private enum class GroupMode { ALL, ANY, NONE }
@@ -101,6 +108,7 @@ private fun GroupEditor(group: Group, depth: Int, onChange: (Group) -> Unit, onR
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             AddButton(R.string.filter_add_text) { add(TextMatch(TextField.TITLE, TextOperator.CONTAINS, "")) }
             AddButton(R.string.filter_add_all_day) { add(AllDay(true)) }
+            AddButton(R.string.filter_add_within_days) { add(StartsWithinDays(7)) }
             if (depth < MAX_GROUP_DEPTH) AddButton(R.string.filter_add_group) { add(AnyOf(emptyList())) }
         }
     }
@@ -117,6 +125,11 @@ private fun RuleEditor(node: FilterNode, depth: Int, onChange: (FilterNode) -> U
                 stringResource(if (it) R.string.filter_all_day_yes else R.string.filter_all_day_no)
             }) { onChange(AllDay(it)) }
         }
+        node is StartsWithinDays -> RuleRow(onRemove) {
+            Dropdown((WITHIN_DAYS_OPTIONS + node.days).distinct().sorted(), node.days, {
+                pluralStringResource(R.plurals.filter_within_days, it, it)
+            }) { onChange(StartsWithinDays(it)) }
+        }
         // Rules the editor cannot create stay intact; they can only be removed.
         else -> RuleRow(onRemove) { Text(stringResource(R.string.filter_unsupported), style = MaterialTheme.typography.bodyMedium) }
     }
@@ -132,10 +145,19 @@ private fun TextRule(rule: TextMatch, onChange: (FilterNode) -> Unit, onRemove: 
                 Dropdown(TextOperator.entries, rule.operator, { operatorLabel(it) }) { onChange(rule.copy(operator = it)) }
             }
         }
+        val isRegex = rule.operator == TextOperator.MATCHES
+        val problem = if (isRegex && rule.value.isNotBlank()) regexProblem(rule.value) else null
         OutlinedTextField(
             value = rule.value,
             onValueChange = { onChange(rule.copy(value = it)) },
-            label = { Text(stringResource(R.string.filter_value)) },
+            label = { Text(stringResource(if (isRegex) R.string.filter_pattern else R.string.filter_value)) },
+            isError = problem != null,
+            supportingText = when {
+                problem == RegexProblem.TOO_LONG -> { { Text(pluralStringResource(R.plurals.filter_regex_too_long, MAX_REGEX_LENGTH, MAX_REGEX_LENGTH)) } }
+                problem == RegexProblem.INVALID -> { { Text(stringResource(R.string.filter_regex_invalid)) } }
+                isRegex -> { { Text(stringResource(R.string.filter_regex_hint)) } }
+                else -> null
+            },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
         )
@@ -209,5 +231,6 @@ private fun operatorLabel(operator: TextOperator) = stringResource(
         TextOperator.NOT_CONTAINS -> R.string.filter_op_not_contains
         TextOperator.STARTS_WITH -> R.string.filter_op_starts_with
         TextOperator.EQUALS -> R.string.filter_op_equals
+        TextOperator.MATCHES -> R.string.filter_op_matches
     }
 )

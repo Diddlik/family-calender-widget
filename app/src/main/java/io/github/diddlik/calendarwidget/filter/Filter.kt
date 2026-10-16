@@ -38,7 +38,8 @@ data class CalendarIn(val calendarIds: Set<Long>) : FilterNode
 
 /**
  * Text predicate. Matching is case-insensitive and Unicode-normalized; a missing field counts as empty text.
- * A blank [value] never matches CONTAINS, STARTS_WITH or EQUALS, and NOT_CONTAINS is the negation of CONTAINS.
+ * A blank [value] never matches CONTAINS, STARTS_WITH, EQUALS or MATCHES, and NOT_CONTAINS is the negation of CONTAINS.
+ * MATCHES treats [value] as a regular expression found anywhere in the text; see [regexProblem] for its guards.
  */
 @Serializable
 @SerialName("text")
@@ -54,6 +55,11 @@ data object StartsAfterNow : FilterNode
 @SerialName("starts_between")
 data class StartsBetween(val fromEpochMillis: Long, val toEpochMillis: Long) : FilterNode
 
+/** Occurrence begins before [days] times 24 hours from the evaluation time; ongoing occurrences match too. */
+@Serializable
+@SerialName("starts_within_days")
+data class StartsWithinDays(val days: Int) : FilterNode
+
 @Serializable
 @SerialName("all_day")
 data class AllDay(val value: Boolean) : FilterNode
@@ -62,4 +68,4 @@ data class AllDay(val value: Boolean) : FilterNode
 enum class TextField { TITLE, DESCRIPTION, LOCATION }
 
 @Serializable
-enum class TextOperator { CONTAINS, NOT_CONTAINS, STARTS_WITH, EQUALS }
+enum class TextOperator { CONTAINS, NOT_CONTAINS, STARTS_WITH, EQUALS, MATCHES }
