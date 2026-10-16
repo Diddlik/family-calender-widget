@@ -38,8 +38,8 @@ Family calendars get busy: school, sports, birthdays, and somewhere in between t
 | 🔎 **Only what matters** | Build your own filter: title, description or location contains, starts with or is exactly a word or matches a pattern, limited to the next days if you like, combined with all, any or none. Or use the ready-made preset for doctor's appointments. |
 | 🧱 **As many widgets as you like** | Every widget has its own name, calendars, filter and length. Save filters as profiles and calendar selections as groups to reuse them. |
 | 👤 **Who is it for?** | Write titles like `Doctor - Anna Check-up` and the widget shows **Anna** with *Check-up*: the keyword is for filtering, the name stands out. |
-| 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. |
-| ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. |
+| 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. Pop-up with sound or silent, as you like. |
+| ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. Tap the plus to add an event in your calendar app. |
 | ⚡ **Always up to date** | Changes in your calendar show up within seconds; past events disappear on their own. |
 | 🎨 **Your look** | Light, dark or system theme, an accent color, see-through background, a compact view and a day-by-day layout, per widget. |
 | 🌗 **Feels at home** | Resizable, follows your wallpaper colours, English and German. |
@@ -78,7 +78,7 @@ Family Calendar Widget is in **closed testing on Google Play**. Android 8.0 or n
 
 ## 🗺️ What's next
 
-- ➕ Quick-add of new events from the widget
+- ✍️ Creating events right inside the app (today the plus opens your calendar app)
 
 See the [roadmap](docs/ROADMAP.md) for details.
 

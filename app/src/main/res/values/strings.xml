@@ -89,6 +89,7 @@
         <item quantity="other">%1$d calendars</item>
     </plurals>
     <string name="main_widget_edit">Edit</string>
+    <string name="widget_new_event">New event</string>
     <string name="widget_edit">Edit widget</string>
     <string name="config_reminders">Reminders</string>
     <string name="config_reminders_hint">Notifies before matching events, independent of the reminders set in the calendar. All-day events count from 9:00.</string>
@@ -113,6 +114,12 @@
     <string name="config_reminders_allow_exact">Allow alarms</string>
     <string name="notification_channel_name">Event reminders</string>
     <string name="notification_channel_description">Reminders configured per widget</string>
+    <string name="notification_channel_silent_name">Silent event reminders</string>
+    <string name="notification_channel_silent_description">Reminders of widgets set to silent; no sound or pop-up</string>
+    <string name="config_reminder_style">Reminder style</string>
+    <string name="config_reminder_style_alert">Pop-up with sound</string>
+    <string name="config_reminder_style_silent">Silent</string>
+    <string name="config_reminder_sound">Sound and vibration</string>
     <string name="notification_public_title">Upcoming event</string>
 
     <string name="widget_load_failed">Could not read your calendars. Tap to try again.</string>

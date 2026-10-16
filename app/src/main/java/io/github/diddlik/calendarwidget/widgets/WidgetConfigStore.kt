@@ -31,6 +31,7 @@ data class WidgetConfig(
     val useNamingConvention: Boolean = false,
     /** Notifications before matching events, in minutes, independent of the reminders stored in the calendar. */
     val reminderMinutes: Set<Int> = emptySet(),
+    val reminderStyle: ReminderStyle = ReminderStyle.ALERT,
     val theme: WidgetTheme = WidgetTheme.SYSTEM,
     /** Background opacity in percent, one of [BACKGROUND_OPACITY_OPTIONS]. */
     val backgroundOpacity: Int = 100,
@@ -47,6 +48,10 @@ data class WidgetConfig(
         val BACKGROUND_OPACITY_OPTIONS = listOf(100, 75, 50, 25)
     }
 }
+
+/** [ALERT] pops up with sound; [SILENT] only appears in the notification shade. Each maps to its own channel. */
+@Serializable
+enum class ReminderStyle { ALERT, SILENT }
 
 @Serializable
 enum class WidgetTheme { SYSTEM, LIGHT, DARK }

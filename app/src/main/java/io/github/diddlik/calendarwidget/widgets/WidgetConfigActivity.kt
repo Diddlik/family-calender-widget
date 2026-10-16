@@ -134,6 +134,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
+        var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
         var appearance by remember { mutableStateOf(Appearance()) }
         var profileId by remember { mutableStateOf<String?>(null) }
         var stored by remember { mutableStateOf(StoredConfig()) }
@@ -150,6 +151,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
                 reminderMinutes = existing.reminderMinutes
+                reminderStyle = existing.reminderStyle
                 appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
             }
             calendars = repository.calendars()
@@ -247,7 +249,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 steps = WidgetConfig.MAX_ITEMS_LIMIT - 2,
             )
 
-            Reminders(reminderMinutes) { reminderMinutes = it }
+            Reminders(reminderMinutes, reminderStyle, { reminderMinutes = it }, { reminderStyle = it })
 
             AppearanceSection(appearance) { appearance = it }
 
@@ -265,6 +267,7 @@ class WidgetConfigActivity : ComponentActivity() {
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,
+                        reminderStyle = reminderStyle,
                         theme = appearance.theme,
                         backgroundOpacity = appearance.backgroundOpacity,
                         layout = appearance.layout,
@@ -376,7 +379,7 @@ private fun NameDialog(title: Int, onDismiss: () -> Unit, onConfirm: (String) ->
 /** Reminder offsets as toggle chips; turning one on asks for the notification permission where needed. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Reminders(minutes: Set<Int>, onChange: (Set<Int>) -> Unit) {
+private fun Reminders(minutes: Set<Int>, style: ReminderStyle, onChange: (Set<Int>) -> Unit, onStyleChange: (ReminderStyle) -> Unit) {
     val context = LocalContext.current
     var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
     var exactAlarms by remember { mutableStateOf(ReminderNotifier.canScheduleExactAlarms(context)) }
@@ -405,6 +408,24 @@ private fun Reminders(minutes: Set<Int>, onChange: (Set<Int>) -> Unit) {
                 label = { Text(reminderLabel(option)) },
             )
         }
+    }
+    if (minutes.isNotEmpty()) {
+        Choice(
+            R.string.config_reminder_style,
+            ReminderStyle.entries,
+            style,
+            { stringResource(if (it == ReminderStyle.ALERT) R.string.config_reminder_style_alert else R.string.config_reminder_style_silent) },
+            onStyleChange,
+        )
+        TextButton(onClick = {
+            // The channel must exist before its settings screen can be opened.
+            ReminderNotifier.ensureChannels(context)
+            context.startActivity(
+                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, ReminderNotifier.CHANNEL_ALERT)
+            )
+        }) { Text(stringResource(R.string.config_reminder_sound)) }
     }
     if (minutes.isNotEmpty() && !notificationsEnabled) {
         Text(

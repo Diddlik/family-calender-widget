@@ -23,13 +23,14 @@ class WidgetConfigTest {
         assertEquals(WidgetLayout.LIST, config.layout)
         assertEquals(WidgetDensity.COMFORTABLE, config.density)
         assertEquals(WidgetAccent.SYSTEM, config.accent)
+        assertEquals(ReminderStyle.ALERT, config.reminderStyle)
     }
 
     @Test
     fun `name, naming convention, reminders and appearance round-trip`() {
         val config = WidgetConfig(calendarIds = setOf(2), name = "Arzttermine", useNamingConvention = true, reminderMinutes = setOf(60, 1440),
             theme = WidgetTheme.DARK, backgroundOpacity = 50, layout = WidgetLayout.BY_DAY, density = WidgetDensity.COMPACT,
-            accent = WidgetAccent.GREEN,
+            accent = WidgetAccent.GREEN, reminderStyle = ReminderStyle.SILENT,
         )
         assertEquals(config, Json.decodeFromString<WidgetConfig>(Json.encodeToString(config)))
     }
