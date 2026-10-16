@@ -23,7 +23,8 @@ import java.util.concurrent.TimeUnit
  * Widget refresh within Android background limits:
  * - a calendar content-URI trigger re-renders after calendar edits or syncs,
  * - a 15-minute periodic job (the WorkManager minimum) drops finished events,
- * - time, timezone and locale broadcasts re-render immediately.
+ * - time, timezone and locale broadcasts re-render immediately,
+ * - an app update re-renders and re-arms everything.
  * Every refresh also posts due reminders (see [ReminderNotifier]).
  */
 object WidgetRefresh {
@@ -110,12 +111,18 @@ class AgendaWidgetReceiver : GlanceAppWidgetReceiver() {
     }
 }
 
-/** Receives the time, timezone and locale broadcasts declared in the manifest. */
-class TimeChangeReceiver : BroadcastReceiver() {
+/** Receives the system broadcasts declared in the manifest. */
+class SystemChangeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_LOCALE_CHANGED ->
                 WidgetRefresh.refreshNow(context)
+            // An update kills the process and clears alarms; the launcher shows the loading layout until the
+            // widget renders again, and the system does not reliably send APPWIDGET_UPDATE afterwards.
+            Intent.ACTION_MY_PACKAGE_REPLACED -> {
+                WidgetRefresh.schedule(context)
+                WidgetRefresh.refreshNow(context)
+            }
         }
     }
 }

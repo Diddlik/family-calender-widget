@@ -66,6 +66,7 @@ Deferred: direct calendar writes with `WRITE_CALENDAR` (0.3; creating and editin
 18. Save a calendar selection as group, open another widget, apply the group: exactly those calendars are selected.
 19. Tap the plus in the widget header: the calendar app opens a new event; after saving a matching event the widget shows it. With keyword "Arzt" and people "Anna, Ben": the plus opens the dialog; choose Anna, type "Vorsorge": the calendar app opens with the title "Arzt - Anna Vorsorge". Note whether the widget's single calendar is preselected.
 20. Set a widget to "Silent" reminders: the reminder appears in the shade without sound or pop-up. "Sound and vibration" opens the channel settings.
+21. Install an update over an existing installation (`./gradlew installDebug` after a version change) without opening the app: placed widgets show their events again within seconds instead of a loading spinner, and pending reminders still arrive.
 
 ## Contributing
 
