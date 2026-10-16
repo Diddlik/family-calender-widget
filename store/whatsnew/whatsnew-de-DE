@@ -1,7 +1,6 @@
-Neu in 0.2:
-• Stift im Widget: Einstellungen direkt vom Startbildschirm ändern
-• Erinnerungen pro Widget, 15 Minuten bis 1 Woche vorher
-• Widget-Namen, Kalenderauswahl nach Konten gruppiert
-• Namenskonvention „Stichwort - Name Titel“ hebt die Person hervor
-• Übersicht aller Widgets in der App
-• Zuverlässigere Aktualisierung und deutsche Oberfläche
+Neu in 0.3:
+• Eigene Filter: Titel, Beschreibung oder Ort enthält, beginnt mit oder ist genau ein Wort
+• Regeln kombinieren: alle, mindestens eine oder keine muss zutreffen, auch in Gruppen
+• Ganztägige Termine ein- oder ausblenden
+• Akzentfarbe pro Widget
+• Design, Transparenz, Tagesansicht und kompakte Darstellung pro Widget

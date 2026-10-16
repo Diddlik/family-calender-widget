@@ -1,7 +1,6 @@
-New in 0.2:
-• Pencil on the widget: edit it right from the home screen
-• Reminders per widget, 15 minutes to 1 week ahead
-• Widget names, calendars grouped by account
-• Naming convention "Keyword - Name Title" highlights the person
-• Overview of all widgets in the app
-• More reliable updates and a German interface
+New in 0.3:
+• Your own filters: title, description or location contains, starts with or is exactly a word
+• Combine rules: all, at least one or none must match, also in groups
+• Show or hide all-day events
+• Accent color per widget
+• Theme, transparency, day-by-day view and compact rows per widget
