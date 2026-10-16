@@ -1,5 +1,6 @@
 New in 0.4:
-• Filter profiles: save a filter and use it in several widgets
-• Calendar groups: save a calendar selection and apply it with one tap
-• Date range rule: show only events of the next days
-• Pattern rule with regular expressions for power users
+• Plus on the widget: add an event in your calendar app
+• Filter profiles for several widgets, calendar groups in one tap
+• Date range rule: only events of the next days
+• Pattern rule with regular expressions
+• Reminders with pop-up and sound, or silent

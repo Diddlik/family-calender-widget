@@ -1,5 +1,6 @@
 Neu in 0.4:
-• Filterprofile: einen Filter speichern und in mehreren Widgets nutzen
-• Kalendergruppen: eine Kalenderauswahl speichern und mit einem Tipp übernehmen
-• Zeitraum-Regel: nur Termine der nächsten Tage zeigen
-• Muster-Regel mit regulären Ausdrücken für Profis
+• Plus im Widget: neuen Termin in der Kalender-App anlegen
+• Filterprofile für mehrere Widgets, Kalendergruppen per Tipp
+• Zeitraum-Regel: nur Termine der nächsten Tage
+• Muster-Regel mit regulären Ausdrücken
+• Erinnerungen wahlweise mit Pop-up und Ton oder lautlos
