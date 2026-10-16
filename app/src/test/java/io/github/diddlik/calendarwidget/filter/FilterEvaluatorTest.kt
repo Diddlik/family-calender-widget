@@ -94,11 +94,30 @@ class FilterEvaluatorTest {
     }
 
     @Test
-    fun `keyword helpers round-trip`() {
-        val node = titleContainsAny(listOf(" Arzt", "", "Praxis", "Arzt"))
-        assertEquals(listOf("Arzt", "Praxis"), titleKeywordsOf(node))
-        assertEquals(emptyList<String>(), titleKeywordsOf(titleContainsAny(emptyList())))
-        assertNull(titleKeywordsOf(Not(StartsAfterNow)))
+    fun `keyword helper builds an any-title group`() {
+        assertEquals(
+            AnyOf(listOf(title(TextOperator.CONTAINS, "Arzt"), title(TextOperator.CONTAINS, "Praxis"))),
+            titleContainsAny(listOf(" Arzt", "", "Praxis", "Arzt")),
+        )
         assertTrue(titleContainsAny(emptyList()).matches(event(title = null), NOW))
+    }
+
+    @Test
+    fun `incomplete rules and empty groups are dropped`() {
+        val tree = All(
+            listOf(
+                title(TextOperator.CONTAINS, "Arzt"),
+                title(TextOperator.NOT_CONTAINS, " "),
+                AnyOf(listOf(title(TextOperator.EQUALS, ""))),
+                Not(AnyOf(listOf(title(TextOperator.CONTAINS, "abgesagt"), All(emptyList())))),
+                AllDay(false),
+            )
+        )
+        assertEquals(
+            All(listOf(title(TextOperator.CONTAINS, "Arzt"), Not(AnyOf(listOf(title(TextOperator.CONTAINS, "abgesagt")))), AllDay(false))),
+            tree.withoutIncompleteRules(),
+        )
+        assertNull(AnyOf(listOf(title(TextOperator.CONTAINS, ""))).withoutIncompleteRules())
+        assertNull(Not(All(emptyList())).withoutIncompleteRules())
     }
 }

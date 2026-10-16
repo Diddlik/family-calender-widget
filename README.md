@@ -35,20 +35,20 @@ Family calendars get busy: school, sports, birthdays, and somewhere in between t
 | | |
 | --- | --- |
 | 📅 **Your calendars, combined** | Works with every calendar on your phone (Google, Nextcloud and more). Choose several per widget, neatly grouped by account. |
-| 🔎 **Only what matters** | Show events whose title contains your keywords, or use the ready-made preset for doctor's appointments. |
-| 🧱 **As many widgets as you like** | Every widget has its own name, calendars, keywords and length. |
+| 🔎 **Only what matters** | Build your own filter: title, description or location contains, starts with or is exactly a word, combined with all, any or none. Or use the ready-made preset for doctor's appointments. |
+| 🧱 **As many widgets as you like** | Every widget has its own name, calendars, filter and length. |
 | 👤 **Who is it for?** | Write titles like `Doctor - Anna Check-up` and the widget shows **Anna** with *Check-up*: the keyword is for filtering, the name stands out. |
 | 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. |
 | ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. |
 | ⚡ **Always up to date** | Changes in your calendar show up within seconds; past events disappear on their own. |
-| 🎨 **Your look** | Light, dark or system theme, see-through background, a compact view and a day-by-day layout, per widget. |
+| 🎨 **Your look** | Light, dark or system theme, an accent color, see-through background, a compact view and a day-by-day layout, per widget. |
 | 🌗 **Feels at home** | Resizable, follows your wallpaper colours, English and German. |
 
 ## 🚀 Get started in three steps
 
 1. **Install** the app and allow it to read your calendars.
 2. **Add the widget**: long-press your home screen → *Widgets* → *Family Calendar Widget*.
-3. **Choose** calendars, keywords and reminders, then tap *Save*. Done.
+3. **Choose** calendars, filter and reminders, then tap *Save*. Done.
 
 <p align="center">
   <img src="store/graphics/screenshots/en-US/phone-3-configure.png" width="200" alt="Choosing calendars">
@@ -78,7 +78,7 @@ Family Calendar Widget is in **closed testing on Google Play**. Android 8.0 or n
 
 ## 🗺️ What's next
 
-- 🧠 A visual editor for advanced filters and reusable filter profiles
+- 🧠 Reusable filter profiles for several widgets
 - ➕ Quick-add of new events from the widget
 
 See the [roadmap](docs/ROADMAP.md) for details.

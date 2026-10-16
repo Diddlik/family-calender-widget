@@ -14,6 +14,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.net.toUri
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
@@ -162,13 +163,14 @@ class RetryLoadAction : ActionCallback {
 
 /**
  * Theme colors and the background with the configured opacity. Light and dark schemes follow the wallpaper on
- * Android 12+; forced themes use one scheme for day and night. Dynamic colors are resolved at render time,
+ * Android 12+; forced themes use one scheme for day and night. A fixed accent replaces the primary color. Dynamic colors are resolved at render time,
  * so a wallpaper change shows on the next refresh.
  */
 private fun widgetColors(context: Context, config: WidgetConfig?) = run {
     val dynamic = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val light = if (dynamic) dynamicLightColorScheme(context) else lightColorScheme()
-    val dark = if (dynamic) dynamicDarkColorScheme(context) else darkColorScheme()
+    val accent = config?.accent ?: WidgetAccent.SYSTEM
+    val light = (if (dynamic) dynamicLightColorScheme(context) else lightColorScheme()).withPrimary(accent.light)
+    val dark = (if (dynamic) dynamicDarkColorScheme(context) else darkColorScheme()).withPrimary(accent.dark)
     val (day, night) = when (config?.theme ?: WidgetTheme.SYSTEM) {
         WidgetTheme.SYSTEM -> light to dark
         WidgetTheme.LIGHT -> light to light
@@ -181,6 +183,8 @@ private fun widgetColors(context: Context, config: WidgetConfig?) = run {
         night = night.secondaryContainer.copy(alpha = alpha),
     )
 }
+
+private fun ColorScheme.withPrimary(argb: Long?) = if (argb == null) this else copy(primary = Color(argb))
 
 @Composable
 private fun Content(context: Context, state: AgendaState, configure: Action, background: ColorProvider) {

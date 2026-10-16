@@ -36,6 +36,7 @@ data class WidgetConfig(
     val backgroundOpacity: Int = 100,
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
+    val accent: WidgetAccent = WidgetAccent.SYSTEM,
 ) {
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
@@ -55,6 +56,20 @@ enum class WidgetLayout { LIST, BY_DAY }
 /** [COMPACT] puts time and title on one line. */
 @Serializable
 enum class WidgetDensity { COMFORTABLE, COMPACT }
+
+/**
+ * Color of day headers and highlighted names, as ARGB for light and dark backgrounds; [SYSTEM] keeps the theme's
+ * primary color. Both tones keep at least 4.5:1 contrast on the matching default widget background.
+ */
+@Serializable
+enum class WidgetAccent(val light: Long?, val dark: Long?) {
+    SYSTEM(null, null),
+    BLUE(0xFF0D47A1, 0xFF90CAF9),
+    GREEN(0xFF1B5E20, 0xFFA5D6A7),
+    ORANGE(0xFFA33000, 0xFFFFCC80),
+    RED(0xFFB71C1C, 0xFFFFCDD2),
+    PURPLE(0xFF6A1B9A, 0xFFE1BEE7),
+}
 
 /** Versioned root of all persisted settings. Bump [version] and migrate in [ConfigSerializer] on schema changes. */
 @Serializable
