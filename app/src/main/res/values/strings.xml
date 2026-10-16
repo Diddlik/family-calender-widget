@@ -12,7 +12,7 @@
     <string name="about_version">Version %1$s</string>
     <string name="about_copyright">© 2026 Pavel Eremeev · MIT License</string>
     <string name="about_privacy">No internet access, analytics or tracking. Calendar data is read on the device only.</string>
-    <string name="about_credits">Built with AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin and kotlinx.serialization, all licensed under the Apache License 2.0.</string>
+    <string name="about_credits">Built with AndroidX (Jetpack Compose, Glance, WorkManager, DataStore), Kotlin and kotlinx.serialization, all licensed under the Apache License 2.0, and RE2/J (Google, BSD 3-Clause License).</string>
 
     <string name="config_title">Configure agenda</string>
     <string name="config_calendars">Calendars</string>
@@ -39,6 +39,30 @@
     <string name="filter_add_group">Group</string>
     <string name="filter_remove">Remove</string>
     <string name="filter_unsupported">This rule cannot be edited here.</string>
+    <string name="config_group_apply">Calendar groups</string>
+    <string name="config_group_save">Save selection as group</string>
+    <string name="config_group_new">New calendar group</string>
+    <string name="config_profile">Filter profile</string>
+    <string name="config_profile_none">No profile (this widget only)</string>
+    <string name="config_profile_shared">Shared profile: changes apply to every widget using it.</string>
+    <string name="config_profile_save">Save as profile</string>
+    <string name="config_profile_new">New filter profile</string>
+    <string name="config_delete_named">Delete %1$s</string>
+    <string name="config_name_field">Name</string>
+    <string name="config_cancel">Cancel</string>
+    <string name="filter_op_matches">matches pattern</string>
+    <string name="filter_pattern">Regular expression</string>
+    <string name="filter_regex_hint">Ignores case, for example ^(Doctor|Dentist)</string>
+    <string name="filter_regex_invalid">Invalid pattern; this rule is ignored.</string>
+    <plurals name="filter_regex_too_long">
+        <item quantity="one">At most %1$d character; this rule is ignored.</item>
+        <item quantity="other">At most %1$d characters; this rule is ignored.</item>
+    </plurals>
+    <string name="filter_add_within_days">Date range</string>
+    <plurals name="filter_within_days">
+        <item quantity="one">Starts within %d day</item>
+        <item quantity="other">Starts within %d days</item>
+    </plurals>
     <string name="config_preset_medical">Use medical appointments preset</string>
     <plurals name="config_max_items">
         <item quantity="one">Show up to %1$d event</item>
@@ -65,6 +89,7 @@
         <item quantity="other">%1$d calendars</item>
     </plurals>
     <string name="main_widget_edit">Edit</string>
+    <string name="widget_new_event">New event</string>
     <string name="widget_edit">Edit widget</string>
     <string name="config_reminders">Reminders</string>
     <string name="config_reminders_hint">Notifies before matching events, independent of the reminders set in the calendar. All-day events count from 9:00.</string>
@@ -89,6 +114,12 @@
     <string name="config_reminders_allow_exact">Allow alarms</string>
     <string name="notification_channel_name">Event reminders</string>
     <string name="notification_channel_description">Reminders configured per widget</string>
+    <string name="notification_channel_silent_name">Silent event reminders</string>
+    <string name="notification_channel_silent_description">Reminders of widgets set to silent; no sound or pop-up</string>
+    <string name="config_reminder_style">Reminder style</string>
+    <string name="config_reminder_style_alert">Pop-up with sound</string>
+    <string name="config_reminder_style_silent">Silent</string>
+    <string name="config_reminder_sound">Sound and vibration</string>
     <string name="notification_public_title">Upcoming event</string>
 
     <string name="widget_load_failed">Could not read your calendars. Tap to try again.</string>

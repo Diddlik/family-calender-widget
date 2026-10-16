@@ -13,7 +13,7 @@ android {
         minSdk = 26
         targetSdk = 37
         // Single source of the app version (Semantic Versioning); shown in the UI via BuildConfig.
-        versionName = "0.3.0"
+        versionName = "0.4.0"
         // Google Play rejects reused version codes, so CI passes its increasing run number.
         versionCode = providers.gradleProperty("versionCode").map(String::toInt).getOrElse(1)
     }
@@ -66,6 +66,7 @@ dependencies {
     implementation(libs.androidx.work.runtime)
     implementation(libs.androidx.datastore)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.re2j)
 
     testImplementation(libs.junit)
 }

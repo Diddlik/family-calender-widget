@@ -37,7 +37,9 @@ import java.time.ZoneId
  * check, which catches up after reboots and app updates that clear alarms.
  */
 object ReminderNotifier {
-    private const val CHANNEL = "reminders"
+    /** Channel IDs stay fixed: users may have customized sound and vibration in the system settings. */
+    const val CHANNEL_ALERT = "reminders"
+    private const val CHANNEL_SILENT = "reminders_silent"
     private const val PREFS = "reminders"
     private const val KEY_LAST_CHECK = "last_check"
 
@@ -96,7 +98,9 @@ object ReminderNotifier {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) return
-        ensureChannel(context)
+        ensureChannels(context)
+        val alert = config.reminderStyle == ReminderStyle.ALERT
+        val channel = if (alert) CHANNEL_ALERT else CHANNEL_SILENT
         val convention = if (config.useNamingConvention) parseConventionTitle(event.title) else null
         val title = when {
             convention == null -> event.title?.takeIf { it.isNotBlank() } ?: context.getString(R.string.event_no_title)
@@ -108,18 +112,18 @@ object ReminderNotifier {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         // Event titles are private; the lock screen shows only a generic text.
-        val public = NotificationCompat.Builder(context, CHANNEL)
+        val public = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.notification_public_title))
             .build()
-        val notification = NotificationCompat.Builder(context, CHANNEL)
+        val notification = NotificationCompat.Builder(context, channel)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(title)
             .setContentText(formatWhen(context, event, zone))
             .setSubText(config.name.ifBlank { null })
             .setWhen(event.begin.toEpochMilli())
             .setCategory(NotificationCompat.CATEGORY_EVENT)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setPriority(if (alert) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setPublicVersion(public)
             .setContentIntent(open)
@@ -131,10 +135,17 @@ object ReminderNotifier {
     // One notification per occurrence: a later reminder for the same occurrence replaces the earlier one.
     private fun notificationId(event: EventOccurrence) = (event.eventId * 31 + event.begin.toEpochMilli()).hashCode()
 
-    private fun ensureChannel(context: Context) {
-        val channel = NotificationChannel(CHANNEL, context.getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_HIGH)
-            .apply { description = context.getString(R.string.notification_channel_description) }
-        context.getSystemService(NotificationManager::class.java).createNotificationChannel(channel)
+    /** Creating an existing channel only updates its name and description; user changes to importance and sound stay. */
+    fun ensureChannels(context: Context) {
+        val manager = context.getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(
+            NotificationChannel(CHANNEL_ALERT, context.getString(R.string.notification_channel_name), NotificationManager.IMPORTANCE_HIGH)
+                .apply { description = context.getString(R.string.notification_channel_description) }
+        )
+        manager.createNotificationChannel(
+            NotificationChannel(CHANNEL_SILENT, context.getString(R.string.notification_channel_silent_name), NotificationManager.IMPORTANCE_LOW)
+                .apply { description = context.getString(R.string.notification_channel_silent_description) }
+        )
     }
 }
 

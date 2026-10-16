@@ -10,18 +10,18 @@
 - Provide manual test instructions and basic GitHub Actions Android build if feasible.
 
 ## 0.2 Filter editor and widget customization
-- Done in 0.3.0: visual nested rule editor. Open: reusable named filter profiles, calendar group shortcuts.
+- Done in 0.3.0: visual nested rule editor. Done in 0.4.0: reusable named filter profiles, calendar group shortcuts.
 - Done: widget theme, background opacity, density, count, list and by-day layouts, empty/error states, accent color.
-- More advanced field operators; optional guarded regex after security/performance assessment.
+- Done in 0.4.0: date-range rule (starts within N days) and regex matching with RE2/J (linear time, length limit, invalid patterns ignored).
 
 ## 0.3 Quick event creation
-- Plus button opens activity; select writable calendar; create via system calendar handoff.
-- Later direct CalendarContract write behind permission/confirmations.
-- Editing, recurrence and organizer semantics carefully handled.
+- Done in 0.4.0: plus button in the widget hands creation to the calendar app, which selects the writable calendar.
+- Done: editing, recurrence and organizer semantics are left to the calendar app, opened by tapping an event.
+- Open (needs a decision): direct CalendarContract writes behind WRITE_CALENDAR and confirmations; requires privacy policy and Play data safety updates.
 
 ## 0.4 Notifications
 - Done early: per-widget reminder offsets with notification channel, permission handling and exact/inexact alarms.
-- Reminder profiles, notification channel/settings, permission handling, heads-up notification behavior and scheduled reminders with Android limitations.
+- Done in 0.4.0: reminder style per widget (pop-up with sound or silent, one channel each) and a shortcut to the channel's sound settings.
 
 ## Suggested first Codex task
 Read AGENTS.md and docs/*.md. Scaffold the buildable Android app and implement a read-only vertical slice: permission, selected calendars, a hardcoded but reusable preset filter, upcoming instances, widget and independent widget configuration. Add tests and document any unimplemented items or verification blockers. Open a PR rather than committing directly to main.

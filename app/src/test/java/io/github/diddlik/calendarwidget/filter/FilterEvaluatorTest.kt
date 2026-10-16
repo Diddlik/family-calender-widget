@@ -88,7 +88,12 @@ class FilterEvaluatorTest {
     @Test
     fun `definition round-trips through JSON`() {
         val definition = FilterDefinition(
-            root = All(listOf(Not(StartsAfterNow), CalendarIn(setOf(7)), title(TextOperator.CONTAINS, "Arzt"), AllDay(false)))
+            root = All(
+                listOf(
+                    Not(StartsAfterNow), CalendarIn(setOf(7)), title(TextOperator.CONTAINS, "Arzt"), AllDay(false),
+                    StartsWithinDays(30), title(TextOperator.MATCHES, "^arzt"),
+                )
+            )
         )
         assertEquals(definition, Json.decodeFromString<FilterDefinition>(Json.encodeToString(definition)))
     }
@@ -119,5 +124,43 @@ class FilterEvaluatorTest {
         )
         assertNull(AnyOf(listOf(title(TextOperator.CONTAINS, ""))).withoutIncompleteRules())
         assertNull(Not(All(emptyList())).withoutIncompleteRules())
+        assertNull(title(TextOperator.MATCHES, "(").withoutIncompleteRules())
+    }
+
+    @Test
+    fun `starts within days covers ongoing and upcoming occurrences`() {
+        val week = StartsWithinDays(7)
+        assertTrue(week.matches(event(begin = NOW.minus(Duration.ofHours(1))), NOW))
+        assertTrue(week.matches(event(begin = NOW.plus(Duration.ofDays(7)).minusMillis(1)), NOW))
+        assertFalse(week.matches(event(begin = NOW.plus(Duration.ofDays(7))), NOW))
+    }
+
+    @Test
+    fun `regex matches anywhere, ignores case and treats unusable patterns as no match`() {
+        val rule = { pattern: String -> TextMatch(TextField.TITLE, TextOperator.MATCHES, pattern) }
+        assertTrue(rule("^arzt\\b").matches(event(title = "ARZT - Anna"), NOW))
+        assertTrue(rule("(zahn|haus)arzt").matches(event(title = "Termin Zahnarzt"), NOW))
+        assertTrue(rule("ä").matches(event(title = "PRÄXIS"), NOW))
+        assertFalse(rule("^Arzt$").matches(event(title = "Arzt Anna"), NOW))
+        assertFalse(rule("(").matches(event(title = "("), NOW))
+        assertFalse(rule(" ").matches(event(title = " "), NOW))
+        assertFalse(rule("a".repeat(MAX_REGEX_LENGTH + 1)).matches(event(title = "a".repeat(300)), NOW))
+        assertFalse(rule("x").matches(event(title = null), NOW))
+    }
+
+    @Test
+    fun `pathological regex finishes in linear time`() {
+        val title = "a".repeat(5_000) + "!"
+        val started = System.nanoTime()
+        assertFalse(TextMatch(TextField.TITLE, TextOperator.MATCHES, "^(a+)+$").matches(event(title = title), NOW))
+        assertTrue(Duration.ofNanos(System.nanoTime() - started) < Duration.ofSeconds(2))
+    }
+
+    @Test
+    fun `regex problems are reported`() {
+        assertNull(regexProblem("arzt|praxis"))
+        assertEquals(RegexProblem.INVALID, regexProblem("(arzt"))
+        assertEquals(RegexProblem.INVALID, regexProblem("(a)\\1"))
+        assertEquals(RegexProblem.TOO_LONG, regexProblem("a".repeat(MAX_REGEX_LENGTH + 1)))
     }
 }

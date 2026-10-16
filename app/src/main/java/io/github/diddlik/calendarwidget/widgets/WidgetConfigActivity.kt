@@ -28,16 +28,22 @@ import androidx.compose.foundation.selection.triStateToggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
@@ -85,10 +91,11 @@ import io.github.diddlik.calendarwidget.filter.withoutIncompleteRules
 import io.github.diddlik.calendarwidget.ui.AppTheme
 import io.github.diddlik.calendarwidget.ui.CalendarPermissionGate
 import kotlinx.coroutines.launch
+import java.util.UUID
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** Configures one widget instance: name, calendar sources, filter rules, title display, item count, reminders and appearance. */
+/** Configures one widget instance: name, calendar sources and groups, filter rules and profiles, title display, item count, reminders and appearance. */
 class WidgetConfigActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -127,17 +134,24 @@ class WidgetConfigActivity : ComponentActivity() {
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
+        var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
         var appearance by remember { mutableStateOf(Appearance()) }
+        var profileId by remember { mutableStateOf<String?>(null) }
+        var stored by remember { mutableStateOf(StoredConfig()) }
+        var naming by remember { mutableStateOf<Naming?>(null) }
 
         LaunchedEffect(appWidgetId) {
-            val existing = store.get(appWidgetId)
+            stored = store.stored()
+            val existing = stored.widgets[appWidgetId]
             if (existing != null) {
+                profileId = existing.profileId
                 name = existing.name
                 selected = existing.calendarIds
                 filter = existing.filter.root
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
                 reminderMinutes = existing.reminderMinutes
+                reminderStyle = existing.reminderStyle
                 appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
             }
             calendars = repository.calendars()
@@ -148,6 +162,7 @@ class WidgetConfigActivity : ComponentActivity() {
             Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
             return
         }
+        val availableIds = available.map { it.id }.toSet()
         Column(
             modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -166,13 +181,50 @@ class WidgetConfigActivity : ComponentActivity() {
             if (available.isEmpty()) {
                 Text(stringResource(R.string.config_no_calendars), style = MaterialTheme.typography.bodyMedium)
             }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (stored.calendarGroups.isNotEmpty()) {
+                    SavedMenu(
+                        label = stringResource(R.string.config_group_apply),
+                        items = stored.calendarGroups.mapValues { it.value.name },
+                        noneLabel = null,
+                        // Calendars removed from the device since the group was saved are skipped.
+                        onSelect = { id -> stored.calendarGroups[id]?.let { selected = it.calendarIds intersect availableIds } },
+                        onDelete = { id -> scope.launch { store.removeCalendarGroup(id); stored = store.stored() } },
+                    )
+                }
+                TextButton(enabled = selected.isNotEmpty(), onClick = { naming = Naming.CALENDAR_GROUP }) {
+                    Text(stringResource(R.string.config_group_save))
+                }
+            }
             CalendarTree(available, selected) { selected = it }
 
             Text(stringResource(R.string.config_filter), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.config_filter_hint), style = MaterialTheme.typography.bodySmall)
+            if (stored.profiles.isNotEmpty()) {
+                Text(stringResource(R.string.config_profile), style = MaterialTheme.typography.bodyMedium)
+                SavedMenu(
+                    label = profileId?.let { stored.profiles[it]?.name } ?: stringResource(R.string.config_profile_none),
+                    items = stored.profiles.mapValues { it.value.name },
+                    noneLabel = stringResource(R.string.config_profile_none),
+                    onSelect = { id ->
+                        profileId = id
+                        id?.let { stored.profiles[it] }?.let { filter = it.filter.root }
+                    },
+                    onDelete = { id ->
+                        if (profileId == id) profileId = null
+                        scope.launch { store.removeProfile(id); stored = store.stored() }
+                    },
+                )
+            }
+            if (profileId != null) {
+                Text(stringResource(R.string.config_profile_shared), style = MaterialTheme.typography.bodySmall)
+            }
             FilterEditor(filter) { filter = it }
-            TextButton(onClick = { filter = titleContainsAny(KeywordPreset.MEDICAL.keywords) }) {
-                Text(stringResource(R.string.config_preset_medical))
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = { filter = titleContainsAny(KeywordPreset.MEDICAL.keywords) }) {
+                    Text(stringResource(R.string.config_preset_medical))
+                }
+                TextButton(onClick = { naming = Naming.PROFILE }) { Text(stringResource(R.string.config_profile_save)) }
             }
 
             Row(
@@ -197,7 +249,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 steps = WidgetConfig.MAX_ITEMS_LIMIT - 2,
             )
 
-            Reminders(reminderMinutes) { reminderMinutes = it }
+            Reminders(reminderMinutes, reminderStyle, { reminderMinutes = it }, { reminderStyle = it })
 
             AppearanceSection(appearance) { appearance = it }
 
@@ -209,29 +261,55 @@ class WidgetConfigActivity : ComponentActivity() {
                 onClick = {
                     val config = WidgetConfig(
                         // Drop calendars that no longer exist on the device.
-                        calendarIds = selected intersect available.map { it.id }.toSet(),
-                        filter = FilterDefinition(root = filter.withoutIncompleteRules() ?: All(emptyList())),
+                        calendarIds = selected intersect availableIds,
+                        filter = cleaned(filter),
                         maxItems = count,
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,
+                        reminderStyle = reminderStyle,
                         theme = appearance.theme,
                         backgroundOpacity = appearance.backgroundOpacity,
                         layout = appearance.layout,
                         density = appearance.density,
                         accent = appearance.accent,
+                        profileId = profileId,
                     )
                     scope.launch { save(appWidgetId, config) }
                 },
                 modifier = Modifier.fillMaxWidth(),
             ) { Text(stringResource(R.string.config_save)) }
         }
+
+        naming?.let { kind ->
+            NameDialog(
+                title = if (kind == Naming.PROFILE) R.string.config_profile_new else R.string.config_group_new,
+                onDismiss = { naming = null },
+                onConfirm = { newName ->
+                    naming = null
+                    val id = UUID.randomUUID().toString()
+                    scope.launch {
+                        if (kind == Naming.PROFILE) {
+                            store.putProfile(id, FilterProfile(newName, cleaned(filter)))
+                            profileId = id
+                        } else {
+                            store.putCalendarGroup(id, CalendarGroup(newName, selected intersect availableIds))
+                        }
+                        stored = store.stored()
+                    }
+                },
+            )
+        }
     }
+
+    private fun cleaned(filter: FilterNode) = FilterDefinition(root = filter.withoutIncompleteRules() ?: All(emptyList()))
 
     private suspend fun save(appWidgetId: Int, config: WidgetConfig) {
         WidgetConfigStore.get(this).put(appWidgetId, config)
         WidgetRefresh.schedule(this)
-        AgendaWidget.refresh(this, GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId))
+        // Other widgets sharing the profile received the same filter.
+        if (config.profileId != null) AgendaWidget.refreshAll(this)
+        else AgendaWidget.refresh(this, GlanceAppWidgetManager(this).getGlanceIdBy(appWidgetId))
         ReminderNotifier.check(this)
         setResult(RESULT_OK, resultIntent(appWidgetId))
         finish()
@@ -240,10 +318,68 @@ class WidgetConfigActivity : ComponentActivity() {
     private fun resultIntent(appWidgetId: Int) = Intent().putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
 }
 
+private enum class Naming { PROFILE, CALENDAR_GROUP }
+
+/** Menu of saved items; each can be applied or deleted. [noneLabel] adds an entry that selects nothing. */
+@Composable
+private fun SavedMenu(
+    label: String,
+    items: Map<String, String>,
+    noneLabel: String?,
+    onSelect: (String?) -> Unit,
+    onDelete: (String) -> Unit,
+) {
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        OutlinedButton(onClick = { expanded = true }) {
+            Text(label)
+            Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+        }
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            if (noneLabel != null) {
+                DropdownMenuItem(text = { Text(noneLabel) }, onClick = { expanded = false; onSelect(null) })
+            }
+            items.entries.sortedBy { it.value.lowercase() }.forEach { (id, name) ->
+                DropdownMenuItem(
+                    text = { Text(name) },
+                    onClick = { expanded = false; onSelect(id) },
+                    trailingIcon = {
+                        IconButton(onClick = { onDelete(id) }) {
+                            Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.config_delete_named, name))
+                        }
+                    },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun NameDialog(title: Int, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+    var name by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(title)) },
+        text = {
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text(stringResource(R.string.config_name_field)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+            )
+        },
+        confirmButton = {
+            TextButton(enabled = name.isNotBlank(), onClick = { onConfirm(name.trim()) }) { Text(stringResource(R.string.config_save)) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.config_cancel)) } },
+    )
+}
+
 /** Reminder offsets as toggle chips; turning one on asks for the notification permission where needed. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun Reminders(minutes: Set<Int>, onChange: (Set<Int>) -> Unit) {
+private fun Reminders(minutes: Set<Int>, style: ReminderStyle, onChange: (Set<Int>) -> Unit, onStyleChange: (ReminderStyle) -> Unit) {
     val context = LocalContext.current
     var notificationsEnabled by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
     var exactAlarms by remember { mutableStateOf(ReminderNotifier.canScheduleExactAlarms(context)) }
@@ -272,6 +408,24 @@ private fun Reminders(minutes: Set<Int>, onChange: (Set<Int>) -> Unit) {
                 label = { Text(reminderLabel(option)) },
             )
         }
+    }
+    if (minutes.isNotEmpty()) {
+        Choice(
+            R.string.config_reminder_style,
+            ReminderStyle.entries,
+            style,
+            { stringResource(if (it == ReminderStyle.ALERT) R.string.config_reminder_style_alert else R.string.config_reminder_style_silent) },
+            onStyleChange,
+        )
+        TextButton(onClick = {
+            // The channel must exist before its settings screen can be opened.
+            ReminderNotifier.ensureChannels(context)
+            context.startActivity(
+                Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    .putExtra(Settings.EXTRA_CHANNEL_ID, ReminderNotifier.CHANNEL_ALERT)
+            )
+        }) { Text(stringResource(R.string.config_reminder_sound)) }
     }
     if (minutes.isNotEmpty() && !notificationsEnabled) {
         Text(

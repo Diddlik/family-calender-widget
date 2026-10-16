@@ -1,6 +1,6 @@
-Neu in 0.3:
-• Eigene Filter: Titel, Beschreibung oder Ort enthält, beginnt mit oder ist genau ein Wort
-• Regeln kombinieren: alle, mindestens eine oder keine muss zutreffen, auch in Gruppen
-• Ganztägige Termine ein- oder ausblenden
-• Akzentfarbe pro Widget
-• Design, Transparenz, Tagesansicht und kompakte Darstellung pro Widget
+Neu in 0.4:
+• Plus im Widget: neuen Termin in der Kalender-App anlegen
+• Filterprofile für mehrere Widgets, Kalendergruppen per Tipp
+• Zeitraum-Regel: nur Termine der nächsten Tage
+• Muster-Regel mit regulären Ausdrücken
+• Erinnerungen wahlweise mit Pop-up und Ton oder lautlos

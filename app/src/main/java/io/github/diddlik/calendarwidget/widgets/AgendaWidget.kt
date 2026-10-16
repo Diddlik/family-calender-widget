@@ -108,6 +108,8 @@ class AgendaWidget : GlanceAppWidget() {
                 // Distinct data keeps one PendingIntent per widget instance.
                 .setData("calendarwidget://configure/$appWidgetId".toUri())
         )
+        // Without a calendar app that can create events the button would do nothing.
+        val newEvent = newEventIntent().takeIf { context.packageManager.resolveActivity(it, 0) != null }?.let(::actionStartActivity)
         provideContent {
             // update() on a running session only recomposes; the refresh token makes it reload data too.
             val token = currentState(REFRESH_TOKEN)
@@ -117,7 +119,7 @@ class AgendaWidget : GlanceAppWidget() {
             }
             val (colors, background) = widgetColors(context, current.config)
             GlanceTheme(colors = colors) {
-                Content(context, current, configure, background)
+                Content(context, current, configure, newEvent, background)
             }
         }
     }
@@ -187,7 +189,7 @@ private fun widgetColors(context: Context, config: WidgetConfig?) = run {
 private fun ColorScheme.withPrimary(argb: Long?) = if (argb == null) this else copy(primary = Color(argb))
 
 @Composable
-private fun Content(context: Context, state: AgendaState, configure: Action, background: ColorProvider) {
+private fun Content(context: Context, state: AgendaState, configure: Action, newEvent: Action?, background: ColorProvider) {
     Column(
         modifier = GlanceModifier.fillMaxSize().background(background).cornerRadius(16.dp).padding(12.dp),
     ) {
@@ -199,18 +201,9 @@ private fun Content(context: Context, state: AgendaState, configure: Action, bac
                 style = TextStyle(color = GlanceTheme.colors.onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp),
                 modifier = GlanceModifier.defaultWeight().clickable(configure),
             )
+            if (newEvent != null) HeaderButton(R.drawable.ic_widget_add, context.getString(R.string.widget_new_event), newEvent)
             // A visible edit action; tapping the name alone was not discoverable.
-            Box(
-                modifier = GlanceModifier.size(36.dp).cornerRadius(18.dp).clickable(configure),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    provider = ImageProvider(R.drawable.ic_widget_edit),
-                    contentDescription = context.getString(R.string.widget_edit),
-                    colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
-                    modifier = GlanceModifier.size(20.dp),
-                )
-            }
+            HeaderButton(R.drawable.ic_widget_edit, context.getString(R.string.widget_edit), configure)
         }
         Spacer(GlanceModifier.height(4.dp))
         when (state) {
@@ -224,6 +217,21 @@ private fun Content(context: Context, state: AgendaState, configure: Action, bac
                 if (state.events.isEmpty()) Message(context.getString(R.string.widget_empty), configure)
                 else Agenda(context, state)
         }
+    }
+}
+
+@Composable
+private fun HeaderButton(icon: Int, description: String, onClick: Action) {
+    Box(
+        modifier = GlanceModifier.size(36.dp).cornerRadius(18.dp).clickable(onClick),
+        contentAlignment = Alignment.Center,
+    ) {
+        Image(
+            provider = ImageProvider(icon),
+            contentDescription = description,
+            colorFilter = ColorFilter.tint(GlanceTheme.colors.onSurfaceVariant),
+            modifier = GlanceModifier.size(20.dp),
+        )
     }
 }
 
@@ -361,6 +369,12 @@ private fun formatDay(context: Context, date: LocalDate, today: LocalDate): Stri
         date.format(DateTimeFormatter.ofPattern(DateFormat.getBestDateTimePattern(locale, "EEEEdMMMM"), locale))
     }
 }
+
+/**
+ * Hands event creation to the user's calendar app, which picks the calendar and the start time.
+ * The app itself never writes to calendars, so it needs no WRITE_CALENDAR permission.
+ */
+internal fun newEventIntent(): Intent = Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI)
 
 /** Opens the occurrence in the user's calendar app; begin/end select the specific recurrence. */
 internal fun openEventIntent(event: EventOccurrence): Intent =
