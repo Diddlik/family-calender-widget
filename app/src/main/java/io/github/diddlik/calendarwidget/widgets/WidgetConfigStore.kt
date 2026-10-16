@@ -33,7 +33,7 @@ data class WidgetConfig(
     val reminderMinutes: Set<Int> = emptySet(),
     val reminderStyle: ReminderStyle = ReminderStyle.ALERT,
     val theme: WidgetTheme = WidgetTheme.SYSTEM,
-    /** Background opacity in percent, one of [BACKGROUND_OPACITY_OPTIONS]. */
+    /** Background opacity in percent, 0 to 100. */
     val backgroundOpacity: Int = 100,
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
@@ -41,6 +41,8 @@ data class WidgetConfig(
     /** Template for the widget's new-event button: title keyword and the people offered as choices. */
     val newEventKeyword: String = "",
     val people: List<String> = emptyList(),
+    /** Name color per person, keyed by the name as entered in [people]; missing names use [accent]. */
+    val personColors: Map<String, WidgetAccent> = emptyMap(),
     /** Key in [StoredConfig.profiles] whose filter this widget shares; [filter] then holds a copy of it. */
     val profileId: String? = null,
 ) {
@@ -48,8 +50,11 @@ data class WidgetConfig(
         const val DEFAULT_MAX_ITEMS = 10
         const val MAX_ITEMS_LIMIT = 25
         val REMINDER_OPTIONS = listOf(15, 30, 60, 120, 24 * 60, 2 * 24 * 60, 7 * 24 * 60)
-        val BACKGROUND_OPACITY_OPTIONS = listOf(100, 75, 50, 25)
     }
+
+    /** Names in titles may differ in case from the entered ones. */
+    fun personAccent(person: String): WidgetAccent =
+        personColors.entries.firstOrNull { it.key.equals(person, ignoreCase = true) }?.value ?: accent
 }
 
 /** [ALERT] pops up with sound; [SILENT] only appears in the notification shade. Each maps to its own channel. */

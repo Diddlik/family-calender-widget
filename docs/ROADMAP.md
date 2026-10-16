@@ -11,7 +11,7 @@
 
 ## 0.2 Filter editor and widget customization
 - Done in 0.3.0: visual nested rule editor. Done in 0.4.0: reusable named filter profiles, calendar group shortcuts.
-- Done: widget theme, background opacity, density, count, list and by-day layouts, empty/error states, accent color.
+- Done: widget theme, background opacity, density, count, list and by-day layouts, empty/error states, accent color. Done in 0.6.0: color per person, freely adjustable background opacity.
 - Done in 0.4.0: date-range rule (starts within N days) and regex matching with RE2/J (linear time, length limit, invalid patterns ignored).
 
 ## 0.3 Quick event creation

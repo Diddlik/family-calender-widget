@@ -26,6 +26,19 @@ class WidgetConfigTest {
         assertEquals(ReminderStyle.ALERT, config.reminderStyle)
         assertEquals("", config.newEventKeyword)
         assertEquals(emptyList<String>(), config.people)
+        assertEquals(emptyMap<String, WidgetAccent>(), config.personColors)
+    }
+
+    @Test
+    fun `person color matches the name case-insensitively and falls back to the widget accent`() {
+        val config = WidgetConfig(
+            calendarIds = setOf(1),
+            accent = WidgetAccent.BLUE,
+            people = listOf("Anna", "Ben"),
+            personColors = mapOf("Anna" to WidgetAccent.RED),
+        )
+        assertEquals(WidgetAccent.RED, config.personAccent("anna"))
+        assertEquals(WidgetAccent.BLUE, config.personAccent("Ben"))
     }
 
     @Test

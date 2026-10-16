@@ -197,6 +197,17 @@ private fun widgetColors(context: Context, config: WidgetConfig?) = run {
     )
 }
 
+@Composable
+private fun accentColor(accent: WidgetAccent, theme: WidgetTheme): ColorProvider {
+    val light = accent.light ?: return GlanceTheme.colors.primary
+    val dark = accent.dark ?: return GlanceTheme.colors.primary
+    return when (theme) {
+        WidgetTheme.SYSTEM -> DayNightColorProvider(day = Color(light), night = Color(dark))
+        WidgetTheme.LIGHT -> DayNightColorProvider(day = Color(light), night = Color(light))
+        WidgetTheme.DARK -> DayNightColorProvider(day = Color(dark), night = Color(dark))
+    }
+}
+
 private fun ColorScheme.withPrimary(argb: Long?) = if (argb == null) this else copy(primary = Color(argb))
 
 @Composable
@@ -280,8 +291,7 @@ private fun Agenda(context: Context, state: AgendaState.Ready) {
                     context = context,
                     event = row.event,
                     time = if (byDay) formatTime(context, row.event, state.zone) else formatWhen(context, row.event, state.zone),
-                    useNamingConvention = config.useNamingConvention,
-                    compact = config.density == WidgetDensity.COMPACT,
+                    config = config,
                 )
             }
         }
@@ -299,7 +309,8 @@ private fun DayHeader(text: String) {
 }
 
 @Composable
-private fun EventRow(context: Context, event: EventOccurrence, time: String, useNamingConvention: Boolean, compact: Boolean) {
+private fun EventRow(context: Context, event: EventOccurrence, time: String, config: WidgetConfig) {
+    val compact = config.density == WidgetDensity.COMPACT
     Row(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = if (compact) 2.dp else 4.dp)
             .clickable(actionStartActivity(openEventIntent(event))),
@@ -313,11 +324,11 @@ private fun EventRow(context: Context, event: EventOccurrence, time: String, use
         if (compact) {
             EventTime(time)
             Spacer(GlanceModifier.width(8.dp))
-            EventTitle(context, event, useNamingConvention)
+            EventTitle(context, event, config)
         } else {
             Column(modifier = GlanceModifier.fillMaxHeight()) {
                 EventTime(time)
-                EventTitle(context, event, useNamingConvention)
+                EventTitle(context, event, config)
             }
         }
     }
@@ -329,13 +340,13 @@ private fun EventTime(text: String) {
 }
 
 @Composable
-private fun EventTitle(context: Context, event: EventOccurrence, useNamingConvention: Boolean) {
-    val convention = if (useNamingConvention) parseConventionTitle(event.title) else null
+private fun EventTitle(context: Context, event: EventOccurrence, config: WidgetConfig) {
+    val convention = if (config.useNamingConvention) parseConventionTitle(event.title) else null
     if (convention != null) {
         Row {
             Text(
                 text = convention.person,
-                style = TextStyle(color = GlanceTheme.colors.primary, fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                style = TextStyle(color = accentColor(config.personAccent(convention.person), config.theme), fontWeight = FontWeight.Bold, fontSize = 14.sp),
                 maxLines = 1,
             )
             if (convention.title.isNotEmpty()) {

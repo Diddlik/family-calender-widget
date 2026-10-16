@@ -1,3 +1,7 @@
+New in 0.6:
+• Your own color for each person on the widget
+• Widget transparency adjustable from 0 to 100 %
+
 New in 0.5.1:
 • Widgets load right after an app update instead of only spinning
 • Reminders survive an update

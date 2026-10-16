@@ -92,7 +92,6 @@ import io.github.diddlik.calendarwidget.ui.AppTheme
 import io.github.diddlik.calendarwidget.ui.CalendarPermissionGate
 import kotlinx.coroutines.launch
 import java.util.UUID
-import kotlin.math.abs
 import kotlin.math.roundToInt
 
 /** Configures one widget instance: name, calendar sources and groups, filter rules and profiles, title display, item count, reminders and appearance. */
@@ -137,6 +136,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
         var newEventKeyword by remember { mutableStateOf("") }
         var people by remember { mutableStateOf("") }
+        var personColors by remember { mutableStateOf(emptyMap<String, WidgetAccent>()) }
         var appearance by remember { mutableStateOf(Appearance()) }
         var profileId by remember { mutableStateOf<String?>(null) }
         var stored by remember { mutableStateOf(StoredConfig()) }
@@ -156,6 +156,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 reminderStyle = existing.reminderStyle
                 newEventKeyword = existing.newEventKeyword
                 people = existing.people.joinToString(", ")
+                personColors = existing.personColors
                 appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
             }
             calendars = repository.calendars()
@@ -274,6 +275,12 @@ class WidgetConfigActivity : ComponentActivity() {
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 modifier = Modifier.fillMaxWidth(),
             )
+            val personNames = parsePeople(people)
+            personNames.forEach { person ->
+                AccentChoice(person, personColors[person] ?: WidgetAccent.SYSTEM) {
+                    personColors = if (it == WidgetAccent.SYSTEM) personColors - person else personColors + (person to it)
+                }
+            }
 
             Reminders(reminderMinutes, reminderStyle, { reminderMinutes = it }, { reminderStyle = it })
 
@@ -295,7 +302,9 @@ class WidgetConfigActivity : ComponentActivity() {
                         reminderMinutes = reminderMinutes,
                         reminderStyle = reminderStyle,
                         newEventKeyword = newEventKeyword.trim(),
-                        people = people.split(',').map { it.trim() }.filter { it.isNotEmpty() }.distinct(),
+                        people = personNames,
+                        // Colors of removed names would otherwise linger in the stored configuration.
+                        personColors = personColors.filterKeys { it in personNames },
                         theme = appearance.theme,
                         backgroundOpacity = appearance.backgroundOpacity,
                         layout = appearance.layout,
@@ -512,13 +521,17 @@ private fun AppearanceSection(appearance: Appearance, onChange: (Appearance) -> 
             )
         },
     ) { onChange(appearance.copy(theme = it)) }
-    Choice(
-        R.string.config_background,
-        WidgetConfig.BACKGROUND_OPACITY_OPTIONS,
-        // A stored value outside the options shows as the closest one.
-        WidgetConfig.BACKGROUND_OPACITY_OPTIONS.minBy { abs(it - appearance.backgroundOpacity) },
-        { stringResource(R.string.config_background_percent, it) },
-    ) { onChange(appearance.copy(backgroundOpacity = it)) }
+    Text(
+        stringResource(R.string.config_background) + ": " +
+            stringResource(R.string.config_background_percent, appearance.backgroundOpacity),
+        style = MaterialTheme.typography.bodyMedium,
+    )
+    Slider(
+        value = appearance.backgroundOpacity.toFloat(),
+        onValueChange = { onChange(appearance.copy(backgroundOpacity = (it / 5).roundToInt() * 5)) },
+        valueRange = 0f..100f,
+        steps = 19,
+    )
     Choice(
         R.string.config_layout,
         WidgetLayout.entries,
@@ -531,15 +544,15 @@ private fun AppearanceSection(appearance: Appearance, onChange: (Appearance) -> 
         appearance.density,
         { stringResource(if (it == WidgetDensity.COMFORTABLE) R.string.config_density_comfortable else R.string.config_density_compact) },
     ) { onChange(appearance.copy(density = it)) }
-    AccentChoice(appearance.accent) { onChange(appearance.copy(accent = it)) }
+    AccentChoice(stringResource(R.string.config_accent), appearance.accent) { onChange(appearance.copy(accent = it)) }
 }
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun AccentChoice(selected: WidgetAccent, onSelect: (WidgetAccent) -> Unit) {
+private fun AccentChoice(title: String, selected: WidgetAccent, onSelect: (WidgetAccent) -> Unit) {
     val dark = isSystemInDarkTheme()
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.config_accent), style = MaterialTheme.typography.bodyMedium)
+        Text(title, style = MaterialTheme.typography.bodyMedium)
         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             WidgetAccent.entries.forEach { accent ->
                 val swatch = (if (dark) accent.dark else accent.light)?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
@@ -648,3 +661,5 @@ private fun CalendarRow(calendar: CalendarSource, checked: Boolean, onCheckedCha
         Text(calendar.displayName, style = MaterialTheme.typography.bodyLarge)
     }
 }
+
+private fun parsePeople(text: String) = text.split(',').map { it.trim() }.filter { it.isNotEmpty() }.distinct()
