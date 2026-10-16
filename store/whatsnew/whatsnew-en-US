@@ -1,6 +1,3 @@
-New in 0.4:
-• Plus on the widget: add an event in your calendar app
-• Filter profiles for several widgets, calendar groups in one tap
-• Date range rule: only events of the next days
-• Pattern rule with regular expressions
-• Reminders with pop-up and sound, or silent
+New in 0.5:
+• Event template per widget: set a keyword and people
+• Plus on the widget: tap a person and the title, such as "Doctor - Anna Check-up", is already filled in

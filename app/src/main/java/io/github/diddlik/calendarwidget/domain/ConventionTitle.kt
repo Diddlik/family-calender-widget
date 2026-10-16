@@ -18,3 +18,17 @@ fun parseConventionTitle(raw: String?): ConventionTitle? {
     val parts = rest.split(Regex("""\s+"""), limit = 2)
     return ConventionTitle(person = parts[0], title = parts.getOrElse(1) { "" })
 }
+
+/**
+ * Title for a new event from a widget template. With a person it follows the naming convention, so
+ * [parseConventionTitle] recovers person and detail; without a keyword the separator would carry no meaning.
+ */
+fun templateTitle(keyword: String, person: String?, detail: String): String {
+    val parts = listOf(person.orEmpty().trim(), detail.trim()).filter { it.isNotEmpty() }.joinToString(" ")
+    val key = keyword.trim()
+    return when {
+        key.isEmpty() -> parts
+        person.isNullOrBlank() -> listOf(key, parts).filter { it.isNotEmpty() }.joinToString(" ")
+        else -> "$key - $parts"
+    }
+}

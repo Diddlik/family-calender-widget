@@ -109,7 +109,12 @@ class AgendaWidget : GlanceAppWidget() {
                 .setData("calendarwidget://configure/$appWidgetId".toUri())
         )
         // Without a calendar app that can create events the button would do nothing.
-        val newEvent = newEventIntent().takeIf { context.packageManager.resolveActivity(it, 0) != null }?.let(::actionStartActivity)
+        val canCreate = context.packageManager.resolveActivity(newEventIntent(), 0) != null
+        val newEventFromTemplate = actionStartActivity(
+            Intent(context, NewEventActivity::class.java)
+                .putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                .setData("calendarwidget://new-event/$appWidgetId".toUri())
+        )
         provideContent {
             // update() on a running session only recomposes; the refresh token makes it reload data too.
             val token = currentState(REFRESH_TOKEN)
@@ -119,6 +124,12 @@ class AgendaWidget : GlanceAppWidget() {
             }
             val (colors, background) = widgetColors(context, current.config)
             GlanceTheme(colors = colors) {
+                val config = current.config
+                val newEvent = when {
+                    !canCreate -> null
+                    config != null && (config.newEventKeyword.isNotBlank() || config.people.isNotEmpty()) -> newEventFromTemplate
+                    else -> actionStartActivity(newEventIntent())
+                }
                 Content(context, current, configure, newEvent, background)
             }
         }
@@ -374,7 +385,11 @@ private fun formatDay(context: Context, date: LocalDate, today: LocalDate): Stri
  * Hands event creation to the user's calendar app, which picks the calendar and the start time.
  * The app itself never writes to calendars, so it needs no WRITE_CALENDAR permission.
  */
-internal fun newEventIntent(): Intent = Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI)
+internal fun newEventIntent(title: String? = null, calendarId: Long? = null): Intent =
+    Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI).apply {
+        title?.let { putExtra(CalendarContract.Events.TITLE, it) }
+        calendarId?.let { putExtra(CalendarContract.Events.CALENDAR_ID, it) }
+    }
 
 /** Opens the occurrence in the user's calendar app; begin/end select the specific recurrence. */
 internal fun openEventIntent(event: EventOccurrence): Intent =

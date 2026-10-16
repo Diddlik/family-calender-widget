@@ -120,6 +120,16 @@
     <string name="config_reminder_style_alert">Pop-up with sound</string>
     <string name="config_reminder_style_silent">Silent</string>
     <string name="config_reminder_sound">Sound and vibration</string>
+    <string name="config_new_events">New events</string>
+    <string name="config_new_events_hint">The plus on the widget prepares the title, for example “Arzt - Anna Check-up”, then opens your calendar app. Leave both fields empty to open the calendar app directly.</string>
+    <string name="config_new_event_keyword">Keyword</string>
+    <string name="config_people">People, separated by commas</string>
+    <string name="config_people_hint">One word per name, for example Anna, Ben</string>
+    <string name="new_event_who">Who is it for?</string>
+    <string name="new_event_detail">Details (optional)</string>
+    <string name="new_event_preview">Title: %1$s</string>
+    <string name="new_event_open">Open calendar</string>
+    <string name="new_event_failed">No calendar app found that can create events.</string>
     <string name="notification_public_title">Upcoming event</string>
 
     <string name="widget_load_failed">Could not read your calendars. Tap to try again.</string>

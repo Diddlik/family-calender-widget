@@ -31,6 +31,7 @@ Versions: AGP 9.4.1, Gradle 9.8.1, Kotlin 2.4.21, compileSdk/targetSdk 37, minSd
 - Agenda read from `CalendarContract.Instances` (recurrences expanded) over the next 366 days; cancelled, declined, finished and duplicate occurrences are dropped; stable chronological order.
 - Resizable, scrollable Glance home-screen widget; tapping an event opens it in the calendar app, where it can be edited (recurrence and organizer rules are handled there).
 - A plus button in the widget header hands event creation to the calendar app (`ACTION_INSERT`); that app chooses the calendar and start time. The button is hidden when no installed app handles the intent (checked through a `<queries>` entry).
+- New-event template per widget: a keyword and a list of people. With a template, the plus opens a small dialog: pick a person, add optional details, and the calendar app opens with the title prefilled, for example `Arzt - Anna Vorsorge` (the naming convention, so the widget highlights the person). A widget with exactly one calendar suggests it via `Events.CALENDAR_ID`; calendar apps may ignore that extra and let the user choose. Without a template the plus opens the calendar app directly. The medical preset fills the keyword with "Arzt" when it is empty.
 - Appearance per widget: theme (system, light, dark; wallpaper colors on Android 12+, applied on the next refresh after a wallpaper change), background opacity (100/75/50/25 %), layout (list, or grouped by day with Today/Tomorrow headers), density (comfortable, or compact with time and title on one line) and accent color for day headers and highlighted names (system or one of five fixed colors with a light and a dark tone, each at least 4.5:1 against the default widget background). If the calendar provider fails, the widget shows an error with tap-to-retry.
 - English and German UI, following the system language; on Android 13+ the language can also be chosen per app. Dates use the app language, also when formatted in the background.
 
@@ -63,7 +64,7 @@ Deferred: direct calendar writes with `WRITE_CALENDAR` (0.3; creating and editin
 16. Pattern rule `^(arzt|praxis)`: matching titles show regardless of case. Type `(`: the field shows "Invalid pattern". Date range "Starts within 7 days": only events of the next week show.
 17. Save a filter as profile in widget A, link widget B to it, change the filter in B and save: A shows the new results too. Delete the profile: both widgets keep their filter.
 18. Save a calendar selection as group, open another widget, apply the group: exactly those calendars are selected.
-19. Tap the plus in the widget header: the calendar app opens a new event; after saving a matching event the widget shows it.
+19. Tap the plus in the widget header: the calendar app opens a new event; after saving a matching event the widget shows it. With keyword "Arzt" and people "Anna, Ben": the plus opens the dialog; choose Anna, type "Vorsorge": the calendar app opens with the title "Arzt - Anna Vorsorge". Note whether the widget's single calendar is preselected.
 20. Set a widget to "Silent" reminders: the reminder appears in the shade without sound or pop-up. "Sound and vibration" opens the channel settings.
 
 ## Contributing

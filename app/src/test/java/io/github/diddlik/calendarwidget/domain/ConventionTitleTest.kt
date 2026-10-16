@@ -31,4 +31,15 @@ class ConventionTitleTest {
     fun `only the first separator splits`() {
         assertEquals(ConventionTitle("Anna", "Befund - Besprechung"), parseConventionTitle("Arzt - Anna Befund - Besprechung"))
     }
+
+    @Test
+    fun `template titles follow the convention when a person is chosen`() {
+        assertEquals("Arzt - Anna Vorsorge", templateTitle(" Arzt ", "Anna", " Vorsorge "))
+        assertEquals(ConventionTitle("Anna", "Vorsorge"), parseConventionTitle(templateTitle("Arzt", "Anna", "Vorsorge")))
+        assertEquals("Arzt - Anna", templateTitle("Arzt", "Anna", ""))
+        assertEquals("Arzt Kontrolle", templateTitle("Arzt", null, "Kontrolle"))
+        assertEquals("Arzt", templateTitle("Arzt", " ", ""))
+        assertEquals("Anna Vorsorge", templateTitle("", "Anna", "Vorsorge"))
+        assertEquals("", templateTitle("", null, ""))
+    }
 }
