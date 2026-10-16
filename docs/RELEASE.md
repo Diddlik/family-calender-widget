@@ -2,7 +2,7 @@
 
 Every push to `main` runs `.github/workflows/play-internal.yml`: unit tests, a signed release bundle (`.aab`) with `versionCode` = GitHub run number, and an upload to the **closed testing (Alpha)** track (`alpha`). Until the secrets below exist, the workflow only runs the tests and skips signing and upload.
 
-`versionName` stays in `app/build.gradle.kts` and is changed by hand for each user-visible version.
+`versionName` stays in `app/build.gradle.kts` and is changed by hand for each user-visible version. After a successful upload, the workflow creates the GitHub release `v<versionName>` on that commit with the English release notes, unless the tag already exists; pushes without a version change therefore add no release.
 
 ## One-time setup
 

@@ -5,8 +5,9 @@ on:
     branches: [main]
   workflow_dispatch:
 
+# Write access creates the GitHub release for a new versionName.
 permissions:
-  contents: read
+  contents: write
 
 # Play accepts one edit per app at a time; queue uploads instead of running them in parallel.
 concurrency:
@@ -64,6 +65,23 @@ jobs:
           whatsNewDirectory: store/whatsnew
           # Play only accepts draft releases until the app has passed its first review; then set the variable to "completed".
           status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
+
+      # One GitHub release per versionName: later pushes with the same version find the tag and skip.
+      - name: Create GitHub release for a new version
+        if: env.HAS_PLAY_SECRETS == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version=$(sed -n 's/.*versionName = "\(.*\)".*/\1/p' app/build.gradle.kts)
+          if gh release view "v$version" > /dev/null 2>&1; then
+            echo "Release v$version already exists."
+          else
+            {
+              cat store/whatsnew/whatsnew-en-US
+              printf '\n## Install\n\nThe app is in closed testing on Google Play. See the [README](https://github.com/%s#-get-the-app) for how to join.\n' "$GITHUB_REPOSITORY"
+            } > "$RUNNER_TEMP/notes.md"
+            gh release create "v$version" --target "$GITHUB_SHA" --title "Family Calendar Widget $version" --notes-file "$RUNNER_TEMP/notes.md"
+          fi
 
       - name: Remove upload key
         if: always()
