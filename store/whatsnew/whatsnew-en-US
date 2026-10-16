@@ -1,3 +1,7 @@
+New in 0.5.1:
+• Widgets load right after an app update instead of only spinning
+• Reminders survive an update
+
 New in 0.5:
 • Event template per widget: set a keyword and people
 • Plus on the widget: tap a person and the title, such as "Doctor - Anna Check-up", is already filled in

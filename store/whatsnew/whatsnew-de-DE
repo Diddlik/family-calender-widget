@@ -1,3 +1,7 @@
+Neu in 0.5.1:
+• Widgets laden nach einem App-Update wieder sofort, statt sich nur zu drehen
+• Erinnerungen bleiben nach einem Update erhalten
+
 Neu in 0.5:
 • Terminvorlage pro Widget: Stichwort und Personen festlegen
 • Plus im Widget: Person antippen, der Titel wie „Arzt - Anna Vorsorge“ steht schon im Kalender
