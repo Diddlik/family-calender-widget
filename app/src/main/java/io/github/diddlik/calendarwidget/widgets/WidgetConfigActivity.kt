@@ -135,6 +135,8 @@ class WidgetConfigActivity : ComponentActivity() {
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
         var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
+        var newEventKeyword by remember { mutableStateOf("") }
+        var people by remember { mutableStateOf("") }
         var appearance by remember { mutableStateOf(Appearance()) }
         var profileId by remember { mutableStateOf<String?>(null) }
         var stored by remember { mutableStateOf(StoredConfig()) }
@@ -152,6 +154,8 @@ class WidgetConfigActivity : ComponentActivity() {
                 maxItems = existing.maxItems.toFloat()
                 reminderMinutes = existing.reminderMinutes
                 reminderStyle = existing.reminderStyle
+                newEventKeyword = existing.newEventKeyword
+                people = existing.people.joinToString(", ")
                 appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
             }
             calendars = repository.calendars()
@@ -221,7 +225,10 @@ class WidgetConfigActivity : ComponentActivity() {
             }
             FilterEditor(filter) { filter = it }
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextButton(onClick = { filter = titleContainsAny(KeywordPreset.MEDICAL.keywords) }) {
+                TextButton(onClick = {
+                    filter = titleContainsAny(KeywordPreset.MEDICAL.keywords)
+                    if (newEventKeyword.isBlank()) newEventKeyword = KeywordPreset.MEDICAL.keywords.first()
+                }) {
                     Text(stringResource(R.string.config_preset_medical))
                 }
                 TextButton(onClick = { naming = Naming.PROFILE }) { Text(stringResource(R.string.config_profile_save)) }
@@ -249,6 +256,25 @@ class WidgetConfigActivity : ComponentActivity() {
                 steps = WidgetConfig.MAX_ITEMS_LIMIT - 2,
             )
 
+            Text(stringResource(R.string.config_new_events), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.config_new_events_hint), style = MaterialTheme.typography.bodySmall)
+            OutlinedTextField(
+                value = newEventKeyword,
+                onValueChange = { newEventKeyword = it },
+                label = { Text(stringResource(R.string.config_new_event_keyword)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
+                modifier = Modifier.fillMaxWidth(),
+            )
+            OutlinedTextField(
+                value = people,
+                onValueChange = { people = it },
+                label = { Text(stringResource(R.string.config_people)) },
+                supportingText = { Text(stringResource(R.string.config_people_hint)) },
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
+                modifier = Modifier.fillMaxWidth(),
+            )
+
             Reminders(reminderMinutes, reminderStyle, { reminderMinutes = it }, { reminderStyle = it })
 
             AppearanceSection(appearance) { appearance = it }
@@ -268,6 +294,8 @@ class WidgetConfigActivity : ComponentActivity() {
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,
                         reminderStyle = reminderStyle,
+                        newEventKeyword = newEventKeyword.trim(),
+                        people = people.split(',').map { it.trim() }.filter { it.isNotEmpty() }.distinct(),
                         theme = appearance.theme,
                         backgroundOpacity = appearance.backgroundOpacity,
                         layout = appearance.layout,

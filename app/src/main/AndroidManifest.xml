@@ -40,6 +40,14 @@
             </intent-filter>
         </activity>
 
+        <!-- Opened from the widget; its own task keeps the app's main screen out of the way. -->
+        <activity
+            android:name=".widgets.NewEventActivity"
+            android:exported="false"
+            android:excludeFromRecents="true"
+            android:taskAffinity=""
+            android:theme="@android:style/Theme.Translucent.NoTitleBar" />
+
         <receiver
             android:name=".widgets.AgendaWidgetReceiver"
             android:exported="true">

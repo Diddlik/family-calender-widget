@@ -38,6 +38,9 @@ data class WidgetConfig(
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
     val accent: WidgetAccent = WidgetAccent.SYSTEM,
+    /** Template for the widget's new-event button: title keyword and the people offered as choices. */
+    val newEventKeyword: String = "",
+    val people: List<String> = emptyList(),
     /** Key in [StoredConfig.profiles] whose filter this widget shares; [filter] then holds a copy of it. */
     val profileId: String? = null,
 ) {
