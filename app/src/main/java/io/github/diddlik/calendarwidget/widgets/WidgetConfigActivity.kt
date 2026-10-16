@@ -12,6 +12,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,6 +40,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -72,16 +76,19 @@ import androidx.glance.appwidget.GlanceAppWidgetManager
 import io.github.diddlik.calendarwidget.R
 import io.github.diddlik.calendarwidget.calendar.CalendarSourceRepository
 import io.github.diddlik.calendarwidget.domain.CalendarSource
+import io.github.diddlik.calendarwidget.filter.All
 import io.github.diddlik.calendarwidget.filter.FilterDefinition
+import io.github.diddlik.calendarwidget.filter.FilterNode
 import io.github.diddlik.calendarwidget.filter.KeywordPreset
 import io.github.diddlik.calendarwidget.filter.titleContainsAny
-import io.github.diddlik.calendarwidget.filter.titleKeywordsOf
+import io.github.diddlik.calendarwidget.filter.withoutIncompleteRules
 import io.github.diddlik.calendarwidget.ui.AppTheme
 import io.github.diddlik.calendarwidget.ui.CalendarPermissionGate
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 import kotlin.math.roundToInt
 
-/** Configures one widget instance: name, calendar sources, title keywords, title display, item count and reminders. */
+/** Configures one widget instance: name, calendar sources, filter rules, title display, item count, reminders and appearance. */
 class WidgetConfigActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -116,20 +123,22 @@ class WidgetConfigActivity : ComponentActivity() {
         var calendars by remember { mutableStateOf<List<CalendarSource>?>(null) }
         var name by remember { mutableStateOf("") }
         var selected by remember { mutableStateOf(emptySet<Long>()) }
-        var keywords by remember { mutableStateOf("") }
+        var filter by remember { mutableStateOf<FilterNode>(titleContainsAny(emptyList())) }
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
+        var appearance by remember { mutableStateOf(Appearance()) }
 
         LaunchedEffect(appWidgetId) {
             val existing = store.get(appWidgetId)
             if (existing != null) {
                 name = existing.name
                 selected = existing.calendarIds
-                keywords = titleKeywordsOf(existing.filter.root).orEmpty().joinToString(", ")
+                filter = existing.filter.root
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
                 reminderMinutes = existing.reminderMinutes
+                appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
             }
             calendars = repository.calendars()
         }
@@ -159,15 +168,10 @@ class WidgetConfigActivity : ComponentActivity() {
             }
             CalendarTree(available, selected) { selected = it }
 
-            Text(stringResource(R.string.config_keywords), style = MaterialTheme.typography.titleMedium)
-            OutlinedTextField(
-                value = keywords,
-                onValueChange = { keywords = it },
-                label = { Text(stringResource(R.string.config_keywords_label)) },
-                supportingText = { Text(stringResource(R.string.config_keywords_hint)) },
-                modifier = Modifier.fillMaxWidth(),
-            )
-            TextButton(onClick = { keywords = KeywordPreset.MEDICAL.keywords.joinToString(", ") }) {
+            Text(stringResource(R.string.config_filter), style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.config_filter_hint), style = MaterialTheme.typography.bodySmall)
+            FilterEditor(filter) { filter = it }
+            TextButton(onClick = { filter = titleContainsAny(KeywordPreset.MEDICAL.keywords) }) {
                 Text(stringResource(R.string.config_preset_medical))
             }
 
@@ -195,6 +199,8 @@ class WidgetConfigActivity : ComponentActivity() {
 
             Reminders(reminderMinutes) { reminderMinutes = it }
 
+            AppearanceSection(appearance) { appearance = it }
+
             if (selected.isEmpty()) {
                 Text(stringResource(R.string.config_select_calendar), style = MaterialTheme.typography.bodyMedium)
             }
@@ -204,11 +210,16 @@ class WidgetConfigActivity : ComponentActivity() {
                     val config = WidgetConfig(
                         // Drop calendars that no longer exist on the device.
                         calendarIds = selected intersect available.map { it.id }.toSet(),
-                        filter = FilterDefinition(root = titleContainsAny(keywords.split(','))),
+                        filter = FilterDefinition(root = filter.withoutIncompleteRules() ?: All(emptyList())),
                         maxItems = count,
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,
+                        theme = appearance.theme,
+                        backgroundOpacity = appearance.backgroundOpacity,
+                        layout = appearance.layout,
+                        density = appearance.density,
+                        accent = appearance.accent,
                     )
                     scope.launch { save(appWidgetId, config) }
                 },
@@ -292,6 +303,103 @@ private fun reminderLabel(minutes: Int): String = when {
     minutes % MINUTES_PER_DAY == 0 -> (minutes / MINUTES_PER_DAY).let { pluralStringResource(R.plurals.reminder_days, it, it) }
     minutes % 60 == 0 -> (minutes / 60).let { pluralStringResource(R.plurals.reminder_hours, it, it) }
     else -> pluralStringResource(R.plurals.reminder_minutes, minutes, minutes)
+}
+
+private data class Appearance(
+    val theme: WidgetTheme = WidgetTheme.SYSTEM,
+    val backgroundOpacity: Int = 100,
+    val layout: WidgetLayout = WidgetLayout.LIST,
+    val density: WidgetDensity = WidgetDensity.COMFORTABLE,
+    val accent: WidgetAccent = WidgetAccent.SYSTEM,
+)
+
+@Composable
+private fun AppearanceSection(appearance: Appearance, onChange: (Appearance) -> Unit) {
+    Text(stringResource(R.string.config_appearance), style = MaterialTheme.typography.titleMedium)
+    Choice(
+        R.string.config_theme,
+        WidgetTheme.entries,
+        appearance.theme,
+        {
+            stringResource(
+                when (it) {
+                    WidgetTheme.SYSTEM -> R.string.config_theme_system
+                    WidgetTheme.LIGHT -> R.string.config_theme_light
+                    WidgetTheme.DARK -> R.string.config_theme_dark
+                }
+            )
+        },
+    ) { onChange(appearance.copy(theme = it)) }
+    Choice(
+        R.string.config_background,
+        WidgetConfig.BACKGROUND_OPACITY_OPTIONS,
+        // A stored value outside the options shows as the closest one.
+        WidgetConfig.BACKGROUND_OPACITY_OPTIONS.minBy { abs(it - appearance.backgroundOpacity) },
+        { stringResource(R.string.config_background_percent, it) },
+    ) { onChange(appearance.copy(backgroundOpacity = it)) }
+    Choice(
+        R.string.config_layout,
+        WidgetLayout.entries,
+        appearance.layout,
+        { stringResource(if (it == WidgetLayout.LIST) R.string.config_layout_list else R.string.config_layout_by_day) },
+    ) { onChange(appearance.copy(layout = it)) }
+    Choice(
+        R.string.config_density,
+        WidgetDensity.entries,
+        appearance.density,
+        { stringResource(if (it == WidgetDensity.COMFORTABLE) R.string.config_density_comfortable else R.string.config_density_compact) },
+    ) { onChange(appearance.copy(density = it)) }
+    AccentChoice(appearance.accent) { onChange(appearance.copy(accent = it)) }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun AccentChoice(selected: WidgetAccent, onSelect: (WidgetAccent) -> Unit) {
+    val dark = isSystemInDarkTheme()
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.config_accent), style = MaterialTheme.typography.bodyMedium)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            WidgetAccent.entries.forEach { accent ->
+                val swatch = (if (dark) accent.dark else accent.light)?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+                FilterChip(
+                    selected = accent == selected,
+                    onClick = { onSelect(accent) },
+                    label = { Text(accentLabel(accent)) },
+                    leadingIcon = { Box(modifier = Modifier.size(16.dp).clip(CircleShape).background(swatch)) },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun accentLabel(accent: WidgetAccent) = stringResource(
+    when (accent) {
+        WidgetAccent.SYSTEM -> R.string.config_theme_system
+        WidgetAccent.BLUE -> R.string.config_accent_blue
+        WidgetAccent.GREEN -> R.string.config_accent_green
+        WidgetAccent.ORANGE -> R.string.config_accent_orange
+        WidgetAccent.RED -> R.string.config_accent_red
+        WidgetAccent.PURPLE -> R.string.config_accent_purple
+    }
+)
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> Choice(title: Int, options: List<T>, selected: T, label: @Composable (T) -> String, onSelect: (T) -> Unit) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(title), style = MaterialTheme.typography.bodyMedium)
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            options.forEachIndexed { index, option ->
+                SegmentedButton(
+                    selected = option == selected,
+                    onClick = { onSelect(option) },
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                    label = { Text(label(option), maxLines = 1) },
+                )
+            }
+        }
+    }
 }
 
 /** Calendars grouped by account; an account checkbox selects or clears all of its calendars. */

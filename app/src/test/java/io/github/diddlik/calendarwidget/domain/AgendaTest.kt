@@ -8,6 +8,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
 import java.time.ZoneId
 
 class AgendaTest {
@@ -96,5 +97,18 @@ class AgendaTest {
         val allDay = event(begin = begin, end = end, allDay = true)
         assertEquals(1, selectAgenda(listOf(allDay), matchAll, Instant.parse("2026-03-10T22:30:00Z"), 10).size)
         assertEquals(0, selectAgenda(listOf(allDay), matchAll, Instant.parse("2026-03-10T23:00:00Z"), 10).size)
+    }
+
+    @Test
+    fun `groups by local day and moves ongoing events to today`() {
+        val zone = ZoneId.of("Europe/Berlin")
+        val today = LocalDate.of(2026, 3, 10)
+        val ongoing = event(eventId = 1, begin = Instant.parse("2026-03-09T20:00:00Z"), end = hours(2))
+        val lateToday = event(eventId = 2, begin = Instant.parse("2026-03-10T22:30:00Z"))
+        // 23:30 UTC is already the next day in Berlin.
+        val tomorrow = event(eventId = 3, begin = Instant.parse("2026-03-10T23:30:00Z"))
+        val result = groupByDay(listOf(ongoing, lateToday, tomorrow), zone, today)
+        assertEquals(listOf(today, today.plusDays(1)), result.map { it.first })
+        assertEquals(listOf(listOf(1L, 2L), listOf(3L)), result.map { day -> day.second.map { it.eventId } })
     }
 }

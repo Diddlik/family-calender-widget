@@ -43,10 +43,14 @@ fun titleContainsAny(keywords: List<String>): FilterNode {
     else AnyOf(terms.map { TextMatch(TextField.TITLE, TextOperator.CONTAINS, it) })
 }
 
-/** Inverse of [titleContainsAny], used to show a stored filter in the keyword editor. Null if the tree has another shape. */
-fun titleKeywordsOf(node: FilterNode): List<String>? = when {
-    node is All && node.children.isEmpty() -> emptyList()
-    node is AnyOf && node.children.all { it is TextMatch && it.field == TextField.TITLE && it.operator == TextOperator.CONTAINS } ->
-        node.children.map { (it as TextMatch).value }
-    else -> null
+/**
+ * Drops what the rule editor leaves incomplete: text rules with a blank value and groups without remaining rules.
+ * Returns null when nothing remains; callers then match everything.
+ */
+fun FilterNode.withoutIncompleteRules(): FilterNode? = when (this) {
+    is All -> children.mapNotNull { it.withoutIncompleteRules() }.takeIf { it.isNotEmpty() }?.let(::All)
+    is AnyOf -> children.mapNotNull { it.withoutIncompleteRules() }.takeIf { it.isNotEmpty() }?.let(::AnyOf)
+    is Not -> child.withoutIncompleteRules()?.let(::Not)
+    is TextMatch -> takeIf { value.isNotBlank() }
+    else -> this
 }
