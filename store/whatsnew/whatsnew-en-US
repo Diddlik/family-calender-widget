@@ -1,6 +1,5 @@
-New in 0.3:
-• Your own filters: title, description or location contains, starts with or is exactly a word
-• Combine rules: all, at least one or none must match, also in groups
-• Show or hide all-day events
-• Accent color per widget
-• Theme, transparency, day-by-day view and compact rows per widget
+New in 0.4:
+• Filter profiles: save a filter and use it in several widgets
+• Calendar groups: save a calendar selection and apply it with one tap
+• Date range rule: show only events of the next days
+• Pattern rule with regular expressions for power users
