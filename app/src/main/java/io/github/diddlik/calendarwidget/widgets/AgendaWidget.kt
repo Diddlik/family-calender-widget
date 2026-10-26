@@ -67,6 +67,7 @@ import io.github.diddlik.calendarwidget.R
 import io.github.diddlik.calendarwidget.calendar.CalendarSourceRepository
 import io.github.diddlik.calendarwidget.domain.EventOccurrence
 import io.github.diddlik.calendarwidget.domain.groupByDay
+import io.github.diddlik.calendarwidget.domain.isPast
 import io.github.diddlik.calendarwidget.domain.parseConventionTitle
 import io.github.diddlik.calendarwidget.domain.selectAgenda
 import io.github.diddlik.calendarwidget.ui.MainActivity
@@ -80,11 +81,14 @@ import java.time.format.FormatStyle
 /** Read window for occurrences; bounds provider work while covering appointments booked far ahead. */
 private val LOOKAHEAD: Duration = Duration.ofDays(366)
 
+/** Fades the calendar color bar of past events. */
+private const val PAST_ALPHA = 0.4f
+
 private sealed interface AgendaState {
     data object NotConfigured : AgendaState
     data class PermissionMissing(val config: WidgetConfig) : AgendaState
     data class Failed(val config: WidgetConfig) : AgendaState
-    data class Ready(val config: WidgetConfig, val events: List<EventOccurrence>, val zone: ZoneId) : AgendaState
+    data class Ready(val config: WidgetConfig, val events: List<EventOccurrence>, val zone: ZoneId, val now: Instant) : AgendaState
 }
 
 private val AgendaState.config: WidgetConfig?
@@ -155,15 +159,19 @@ class AgendaWidget : GlanceAppWidget() {
         if (!repository.hasPermission()) return AgendaState.PermissionMissing(config)
         val now = Instant.now()
         val zone = ZoneId.systemDefault()
+        val pastDays = config.pastDays.coerceIn(0, WidgetConfig.MAX_PAST_DAYS)
+        val pastFrom = if (pastDays == 0) now else LocalDate.now(zone).minusDays(pastDays.toLong()).atStartOfDay(zone).toInstant()
         val occurrences = try {
-            repository.occurrences(config.calendarIds, now.minus(Duration.ofDays(1)), now.plus(LOOKAHEAD), zone)
+            // The extra day catches events that began earlier and are still ongoing or ended inside the window.
+            repository.occurrences(config.calendarIds, pastFrom.minus(Duration.ofDays(1)), now.plus(LOOKAHEAD), zone)
         } catch (_: SecurityException) {
             return AgendaState.PermissionMissing(config)
         } catch (_: RuntimeException) {
             // Calendar providers of some sync adapters fail transiently; offer a retry instead of crashing the widget.
             return AgendaState.Failed(config)
         }
-        return AgendaState.Ready(config, selectAgenda(occurrences, config.filter.root, now, config.maxItems), zone)
+        val events = selectAgenda(occurrences, config.filter.root, now, config.maxItems, pastFrom)
+        return AgendaState.Ready(config, events, zone, now)
     }
 }
 
@@ -294,6 +302,7 @@ private fun Agenda(context: Context, state: AgendaState.Ready) {
                     // By-day headers already name the weekday.
                     weekday = if (byDay) null else formatWeekday(context, row.event, state.zone),
                     config = config,
+                    past = row.event.isPast(state.now),
                 )
             }
         }
@@ -311,7 +320,7 @@ private fun DayHeader(text: String) {
 }
 
 @Composable
-private fun EventRow(context: Context, event: EventOccurrence, time: String, weekday: String?, config: WidgetConfig) {
+private fun EventRow(context: Context, event: EventOccurrence, time: String, weekday: String?, config: WidgetConfig, past: Boolean) {
     val compact = config.density == WidgetDensity.COMPACT
     Row(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = if (compact) 2.dp else 4.dp)
@@ -320,17 +329,17 @@ private fun EventRow(context: Context, event: EventOccurrence, time: String, wee
     ) {
         Box(
             modifier = GlanceModifier.width(4.dp).height(if (compact) 16.dp else 36.dp).cornerRadius(2.dp)
-                .background(event.color?.let { Color(it) } ?: Color.Gray),
+                .background((event.color?.let { Color(it) } ?: Color.Gray).copy(alpha = if (past) PAST_ALPHA else 1f)),
         ) {}
         Spacer(GlanceModifier.width(8.dp))
         if (compact) {
             EventTime(time, weekday)
             Spacer(GlanceModifier.width(8.dp))
-            EventTitle(context, event, config)
+            EventTitle(context, event, config, past)
         } else {
             Column(modifier = GlanceModifier.fillMaxHeight()) {
                 EventTime(time, weekday)
-                EventTitle(context, event, config)
+                EventTitle(context, event, config, past)
             }
         }
     }
@@ -357,19 +366,21 @@ private fun EventTime(text: String, weekday: String?) {
 }
 
 @Composable
-private fun EventTitle(context: Context, event: EventOccurrence, config: WidgetConfig) {
+private fun EventTitle(context: Context, event: EventOccurrence, config: WidgetConfig, past: Boolean) {
+    // onSurfaceVariant keeps AA contrast while past rows read as secondary.
+    val titleColor = if (past) GlanceTheme.colors.onSurfaceVariant else GlanceTheme.colors.onSurface
     val convention = if (config.useNamingConvention) parseConventionTitle(event.title) else null
     if (convention != null) {
         Row {
             Text(
                 text = convention.person,
-                style = TextStyle(color = accentColor(config.personAccent(convention.person), config.theme), fontWeight = FontWeight.Bold, fontSize = 14.sp),
+                style = TextStyle(color = if (past) titleColor else accentColor(config.personAccent(convention.person), config.theme), fontWeight = FontWeight.Bold, fontSize = 14.sp),
                 maxLines = 1,
             )
             if (convention.title.isNotEmpty()) {
                 Text(
                     text = "  " + convention.title,
-                    style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp),
+                    style = TextStyle(color = titleColor, fontSize = 14.sp),
                     maxLines = 1,
                 )
             }
@@ -377,7 +388,7 @@ private fun EventTitle(context: Context, event: EventOccurrence, config: WidgetC
     } else {
         Text(
             text = event.title?.takeIf { it.isNotBlank() } ?: context.getString(R.string.event_no_title),
-            style = TextStyle(color = GlanceTheme.colors.onSurface, fontSize = 14.sp),
+            style = TextStyle(color = titleColor, fontSize = 14.sp),
             maxLines = 1,
         )
     }

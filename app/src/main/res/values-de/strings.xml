@@ -66,6 +66,12 @@
         <item quantity="one">Bis zu %1$d Termin anzeigen</item>
         <item quantity="other">Bis zu %1$d Termine anzeigen</item>
     </plurals>
+    <string name="config_past_days_off">Vergangene Termine ausblenden</string>
+    <plurals name="config_past_days">
+        <item quantity="one">Vergangene Termine von heute und dem letzten %1$d Tag anzeigen</item>
+        <item quantity="other">Vergangene Termine von heute und den letzten %1$d Tagen anzeigen</item>
+    </plurals>
+    <string name="config_past_days_hint">Vergangene Termine erscheinen ausgegraut und zählen nicht zur Terminanzahl.</string>
     <string name="config_save">Speichern</string>
 
     <string name="widget_title">Demnächst</string>

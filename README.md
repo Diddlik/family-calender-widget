@@ -41,7 +41,7 @@ Family calendars get busy: school, sports, birthdays, and somewhere in between t
 | 🔔 **Reminders, your way** | Get notified 15 minutes to a week ahead, separately for each widget and independent of the reminders in your calendar. Pop-up with sound or silent, as you like. |
 | ✏️ **Edit in place** | Tap the pencil on the widget to change it, or manage all widgets in the app. Tap the plus to add an event: pick the person, and the title such as `Doctor - Anna Check-up` is filled in for you in your calendar app. |
 | ⚡ **Always up to date** | Changes in your calendar show up within seconds; past events disappear on their own. |
-| 🎨 **Your look** | Light, dark or system theme, an accent color, a color per person, the weekday at a glance, adjustable transparency, a compact view and a day-by-day layout, per widget. |
+| 🎨 **Your look** | Light, dark or system theme, an accent color, a color per person, the weekday at a glance, adjustable transparency, past events greyed out if you like, a compact view and a day-by-day layout, per widget. |
 | 🌗 **Feels at home** | Resizable, follows your wallpaper colours, English and German. |
 
 ## 🚀 Get started in three steps

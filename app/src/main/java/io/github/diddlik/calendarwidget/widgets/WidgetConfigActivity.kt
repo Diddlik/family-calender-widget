@@ -132,6 +132,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var filter by remember { mutableStateOf<FilterNode>(titleContainsAny(emptyList())) }
         var useNamingConvention by remember { mutableStateOf(false) }
         var maxItems by remember { mutableFloatStateOf(WidgetConfig.DEFAULT_MAX_ITEMS.toFloat()) }
+        var pastDays by remember { mutableFloatStateOf(0f) }
         var reminderMinutes by remember { mutableStateOf(emptySet<Int>()) }
         var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
         var newEventKeyword by remember { mutableStateOf("") }
@@ -152,6 +153,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 filter = existing.filter.root
                 useNamingConvention = existing.useNamingConvention
                 maxItems = existing.maxItems.toFloat()
+                pastDays = existing.pastDays.toFloat()
                 reminderMinutes = existing.reminderMinutes
                 reminderStyle = existing.reminderStyle
                 newEventKeyword = existing.newEventKeyword
@@ -257,6 +259,20 @@ class WidgetConfigActivity : ComponentActivity() {
                 steps = WidgetConfig.MAX_ITEMS_LIMIT - 2,
             )
 
+            val past = pastDays.roundToInt()
+            Text(
+                if (past == 0) stringResource(R.string.config_past_days_off)
+                else pluralStringResource(R.plurals.config_past_days, past, past),
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Text(stringResource(R.string.config_past_days_hint), style = MaterialTheme.typography.bodySmall)
+            Slider(
+                value = pastDays,
+                onValueChange = { pastDays = it },
+                valueRange = 0f..WidgetConfig.MAX_PAST_DAYS.toFloat(),
+                steps = WidgetConfig.MAX_PAST_DAYS - 1,
+            )
+
             Text(stringResource(R.string.config_new_events), style = MaterialTheme.typography.titleMedium)
             Text(stringResource(R.string.config_new_events_hint), style = MaterialTheme.typography.bodySmall)
             OutlinedTextField(
@@ -297,6 +313,7 @@ class WidgetConfigActivity : ComponentActivity() {
                         calendarIds = selected intersect availableIds,
                         filter = cleaned(filter),
                         maxItems = count,
+                        pastDays = past,
                         name = name.trim(),
                         useNamingConvention = useNamingConvention,
                         reminderMinutes = reminderMinutes,

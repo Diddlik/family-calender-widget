@@ -32,6 +32,22 @@ class AgendaTest {
     }
 
     @Test
+    fun `keeps events ended after pastFrom without counting them towards the limit`() {
+        val result = selectAgenda(
+            listOf(
+                event(eventId = 1, begin = hours(-50), end = hours(-49)),
+                event(eventId = 2, begin = hours(-30), end = hours(-29)),
+                event(eventId = 3, begin = hours(-3), end = hours(-2)),
+                event(eventId = 4, begin = hours(2)),
+                event(eventId = 5, begin = hours(3)),
+            ),
+            matchAll, NOW, 1, pastFrom = hours(-48),
+        )
+        assertEquals(listOf(2L, 3L, 4L), result.map { it.eventId })
+        assertEquals(listOf(true, true, false), result.map { it.isPast(NOW) })
+    }
+
+    @Test
     fun `removes duplicate occurrences and keeps distinct recurrences`() {
         val result = selectAgenda(
             listOf(
@@ -110,5 +126,20 @@ class AgendaTest {
         val result = groupByDay(listOf(ongoing, lateToday, tomorrow), zone, today)
         assertEquals(listOf(today, today.plusDays(1)), result.map { it.first })
         assertEquals(listOf(listOf(1L, 2L), listOf(3L)), result.map { day -> day.second.map { it.eventId } })
+    }
+
+    @Test
+    fun `groups events that ended before today under their own day`() {
+        val zone = ZoneId.of("Europe/Berlin")
+        val today = LocalDate.of(2026, 3, 10)
+        val yesterday = event(eventId = 1, begin = Instant.parse("2026-03-09T08:00:00Z"))
+        val allDayYesterday = event(
+            eventId = 2,
+            begin = allDayToLocal(Instant.parse("2026-03-09T00:00:00Z"), zone),
+            end = allDayToLocal(Instant.parse("2026-03-10T00:00:00Z"), zone),
+            allDay = true,
+        )
+        val result = groupByDay(listOf(allDayYesterday, yesterday), zone, today)
+        assertEquals(listOf(today.minusDays(1) to listOf(allDayYesterday, yesterday)), result)
     }
 }

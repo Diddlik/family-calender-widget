@@ -25,6 +25,8 @@ data class WidgetConfig(
     val calendarIds: Set<Long>,
     val filter: FilterDefinition = FilterDefinition(root = titleContainsAny(emptyList())),
     val maxItems: Int = DEFAULT_MAX_ITEMS,
+    /** Also shows events that ended today or on the previous [pastDays] days, greyed out; 0 hides finished events. */
+    val pastDays: Int = 0,
     /** Shown as the widget header; blank uses the default title. */
     val name: String = "",
     /** Display titles written as "<keywords> - <person> <title>" as person and title; see `parseConventionTitle`. */
@@ -49,6 +51,7 @@ data class WidgetConfig(
     companion object {
         const val DEFAULT_MAX_ITEMS = 10
         const val MAX_ITEMS_LIMIT = 25
+        const val MAX_PAST_DAYS = 30
         val REMINDER_OPTIONS = listOf(15, 30, 60, 120, 24 * 60, 2 * 24 * 60, 7 * 24 * 60)
     }
 

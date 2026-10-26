@@ -68,6 +68,12 @@
         <item quantity="one">Show up to %1$d event</item>
         <item quantity="other">Show up to %1$d events</item>
     </plurals>
+    <string name="config_past_days_off">Hide past events</string>
+    <plurals name="config_past_days">
+        <item quantity="one">Show past events from today and the last %1$d day</item>
+        <item quantity="other">Show past events from today and the last %1$d days</item>
+    </plurals>
+    <string name="config_past_days_hint">Past events appear greyed out and do not count towards the event limit.</string>
     <string name="config_save">Save</string>
 
     <string name="widget_title">Upcoming</string>
