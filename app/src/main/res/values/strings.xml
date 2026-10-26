@@ -73,7 +73,7 @@
         <item quantity="one">Show past events from today and the last %1$d day</item>
         <item quantity="other">Show past events from today and the last %1$d days</item>
     </plurals>
-    <string name="config_past_days_hint">Past events appear greyed out and do not count towards the event limit.</string>
+    <string name="config_past_days_hint">The latest 3 past events appear greyed out and do not count towards the event limit.</string>
     <string name="config_save">Save</string>
 
     <string name="widget_title">Upcoming</string>
@@ -142,6 +142,25 @@
     <string name="widget_today">Today</string>
     <string name="widget_tomorrow">Tomorrow</string>
     <string name="widget_all_day">All day</string>
+    <string name="widget_yesterday">Yesterday</string>
+    <string name="widget_until">until %1$s</string>
+    <string name="widget_past">Past</string>
+    <string name="widget_countdown_now">now</string>
+    <plurals name="widget_countdown_minutes">
+        <item quantity="one">in %d min</item>
+        <item quantity="other">in %d min</item>
+    </plurals>
+    <plurals name="widget_countdown_hours">
+        <item quantity="one">in %d hour</item>
+        <item quantity="other">in %d hours</item>
+    </plurals>
+    <plurals name="widget_countdown_days">
+        <item quantity="one">in %d day</item>
+        <item quantity="other">in %d days</item>
+    </plurals>
+    <string name="config_show_countdown">Show time until the event</string>
+    <string name="config_show_end_time">Show end time</string>
+    <string name="config_show_location">Show location</string>
     <string name="config_appearance">Appearance</string>
     <string name="config_theme">Theme</string>
     <string name="config_theme_system">System</string>

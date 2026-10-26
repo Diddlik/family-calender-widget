@@ -159,7 +159,10 @@ class WidgetConfigActivity : ComponentActivity() {
                 newEventKeyword = existing.newEventKeyword
                 people = existing.people.joinToString(", ")
                 personColors = existing.personColors
-                appearance = Appearance(existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent)
+                appearance = Appearance(
+                    existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent,
+                    existing.showCountdown, existing.showEndTime, existing.showLocation,
+                )
             }
             calendars = repository.calendars()
         }
@@ -327,6 +330,9 @@ class WidgetConfigActivity : ComponentActivity() {
                         layout = appearance.layout,
                         density = appearance.density,
                         accent = appearance.accent,
+                        showCountdown = appearance.showCountdown,
+                        showEndTime = appearance.showEndTime,
+                        showLocation = appearance.showLocation,
                         profileId = profileId,
                     )
                     scope.launch { save(appWidgetId, config) }
@@ -519,6 +525,9 @@ private data class Appearance(
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
     val accent: WidgetAccent = WidgetAccent.SYSTEM,
+    val showCountdown: Boolean = false,
+    val showEndTime: Boolean = false,
+    val showLocation: Boolean = false,
 )
 
 @Composable
@@ -562,6 +571,21 @@ private fun AppearanceSection(appearance: Appearance, onChange: (Appearance) -> 
         { stringResource(if (it == WidgetDensity.COMFORTABLE) R.string.config_density_comfortable else R.string.config_density_compact) },
     ) { onChange(appearance.copy(density = it)) }
     AccentChoice(stringResource(R.string.config_accent), appearance.accent) { onChange(appearance.copy(accent = it)) }
+    Toggle(R.string.config_show_countdown, appearance.showCountdown) { onChange(appearance.copy(showCountdown = it)) }
+    Toggle(R.string.config_show_end_time, appearance.showEndTime) { onChange(appearance.copy(showEndTime = it)) }
+    Toggle(R.string.config_show_location, appearance.showLocation) { onChange(appearance.copy(showLocation = it)) }
+}
+
+@Composable
+private fun Toggle(label: Int, checked: Boolean, onChange: (Boolean) -> Unit) {
+    Row(
+        modifier = Modifier.fillMaxWidth().toggleable(value = checked, role = Role.Switch, onValueChange = onChange),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(stringResource(label), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.weight(1f))
+        Switch(checked = checked, onCheckedChange = null)
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

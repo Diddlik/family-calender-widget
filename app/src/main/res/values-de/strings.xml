@@ -71,7 +71,7 @@
         <item quantity="one">Vergangene Termine von heute und dem letzten %1$d Tag anzeigen</item>
         <item quantity="other">Vergangene Termine von heute und den letzten %1$d Tagen anzeigen</item>
     </plurals>
-    <string name="config_past_days_hint">Vergangene Termine erscheinen ausgegraut und zählen nicht zur Terminanzahl.</string>
+    <string name="config_past_days_hint">Die letzten 3 vergangenen Termine erscheinen ausgegraut und zählen nicht zur Terminanzahl.</string>
     <string name="config_save">Speichern</string>
 
     <string name="widget_title">Demnächst</string>
@@ -140,6 +140,25 @@
     <string name="widget_today">Heute</string>
     <string name="widget_tomorrow">Morgen</string>
     <string name="widget_all_day">Ganztägig</string>
+    <string name="widget_yesterday">Gestern</string>
+    <string name="widget_until">bis %1$s</string>
+    <string name="widget_past">Vergangen</string>
+    <string name="widget_countdown_now">läuft</string>
+    <plurals name="widget_countdown_minutes">
+        <item quantity="one">in %d Min.</item>
+        <item quantity="other">in %d Min.</item>
+    </plurals>
+    <plurals name="widget_countdown_hours">
+        <item quantity="one">in %d Std.</item>
+        <item quantity="other">in %d Std.</item>
+    </plurals>
+    <plurals name="widget_countdown_days">
+        <item quantity="one">in %d Tag</item>
+        <item quantity="other">in %d Tagen</item>
+    </plurals>
+    <string name="config_show_countdown">Zeit bis zum Termin anzeigen</string>
+    <string name="config_show_end_time">Endzeit anzeigen</string>
+    <string name="config_show_location">Ort anzeigen</string>
     <string name="config_appearance">Darstellung</string>
     <string name="config_theme">Design</string>
     <string name="config_theme_system">System</string>

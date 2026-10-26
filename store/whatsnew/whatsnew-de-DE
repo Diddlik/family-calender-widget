@@ -1,13 +1,8 @@
+Neu in 0.9:
+• Zeit bis zum Termin, Endzeit und Ort optional anzeigen
+• Mehrtägige Termine erscheinen in „Nach Tagen“ an jedem Tag
+• Höchstens 3 vergangene Termine, Überschrift „Gestern“
+• Vergangene Termine werden für Screenreader angesagt
+
 Neu in 0.8:
 • Vergangene Termine der letzten Tage optional ausgegraut anzeigen
-
-Neu in 0.7:
-• Wochentag farbig hervorgehoben vor Datum und Uhrzeit
-
-Neu in 0.6:
-• Eigene Farbe für jede Person im Widget
-• Transparenz des Widgets stufenlos von 0 bis 100 %
-
-Neu in 0.5.1:
-• Widgets laden nach einem App-Update wieder sofort, statt sich nur zu drehen
-• Erinnerungen bleiben nach einem Update erhalten

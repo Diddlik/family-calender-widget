@@ -39,6 +39,10 @@ data class WidgetConfig(
     val backgroundOpacity: Int = 100,
     val layout: WidgetLayout = WidgetLayout.LIST,
     val density: WidgetDensity = WidgetDensity.COMFORTABLE,
+    /** Adds the time until each event starts, such as "in 3 days". */
+    val showCountdown: Boolean = false,
+    val showEndTime: Boolean = false,
+    val showLocation: Boolean = false,
     val accent: WidgetAccent = WidgetAccent.SYSTEM,
     /** Template for the widget's new-event button: title keyword and the people offered as choices. */
     val newEventKeyword: String = "",

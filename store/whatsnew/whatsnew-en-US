@@ -1,13 +1,8 @@
+New in 0.9:
+• Optionally show time until the event, end time and location
+• Multi-day events appear on each day in "By day"
+• At most 3 past events, "Yesterday" header
+• Screen readers announce past events
+
 New in 0.8:
 • Optionally show past events from recent days, greyed out
-
-New in 0.7:
-• Weekday highlighted in color before date and time
-
-New in 0.6:
-• Your own color for each person on the widget
-• Widget transparency adjustable from 0 to 100 %
-
-New in 0.5.1:
-• Widgets load right after an app update instead of only spinning
-• Reminders survive an update

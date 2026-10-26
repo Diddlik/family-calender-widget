@@ -48,6 +48,27 @@ class AgendaTest {
     }
 
     @Test
+    fun `keeps only the latest past events`() {
+        val past = (1L..5L).map { event(eventId = it, begin = hours(-10 + it), end = hours(-9 + it)) }
+        val result = selectAgenda(past, matchAll, NOW, 10, pastFrom = hours(-48))
+        assertEquals(listOf(3L, 4L, 5L), result.map { it.eventId })
+    }
+
+    @Test
+    fun `counts down in minutes, hours and calendar days`() {
+        val zone = ZoneId.of("UTC")
+        assertEquals(null, countdown(event(begin = hours(-2), end = hours(-1)), NOW, zone))
+        assertEquals(Countdown.Ongoing, countdown(event(begin = hours(-1), end = hours(1)), NOW, zone))
+        assertEquals(Countdown.Minutes(1), countdown(event(begin = NOW.plusSeconds(20)), NOW, zone))
+        assertEquals(Countdown.Minutes(45), countdown(event(begin = NOW.plus(Duration.ofMinutes(45))), NOW, zone))
+        assertEquals(Countdown.Hours(23), countdown(event(begin = hours(23).plusSeconds(1800)), NOW, zone))
+        // 36 hours from noon is the day after tomorrow.
+        assertEquals(Countdown.Days(2), countdown(event(begin = hours(36)), NOW, zone))
+        val allDayTomorrow = event(begin = Instant.parse("2026-03-11T00:00:00Z"), end = Instant.parse("2026-03-12T00:00:00Z"), allDay = true)
+        assertEquals(Countdown.Days(1), countdown(allDayTomorrow, NOW, zone))
+    }
+
+    @Test
     fun `removes duplicate occurrences and keeps distinct recurrences`() {
         val result = selectAgenda(
             listOf(
@@ -126,6 +147,22 @@ class AgendaTest {
         val result = groupByDay(listOf(ongoing, lateToday, tomorrow), zone, today)
         assertEquals(listOf(today, today.plusDays(1)), result.map { it.first })
         assertEquals(listOf(listOf(1L, 2L), listOf(3L)), result.map { day -> day.second.map { it.eventId } })
+    }
+
+    @Test
+    fun `repeats multi-day events on each day up to the last starting entry`() {
+        val zone = ZoneId.of("UTC")
+        val today = LocalDate.of(2026, 3, 10)
+        val trip = event(
+            eventId = 1, allDay = true,
+            begin = Instant.parse("2026-03-10T00:00:00Z"), end = Instant.parse("2026-03-20T00:00:00Z"),
+        )
+        val overnight = event(eventId = 2, begin = Instant.parse("2026-03-10T22:00:00Z"), end = Instant.parse("2026-03-11T02:00:00Z"))
+        val later = event(eventId = 3, begin = Instant.parse("2026-03-12T09:00:00Z"))
+        val result = groupByDay(listOf(trip, overnight, later), zone, today)
+        assertEquals(listOf(today, today.plusDays(1), today.plusDays(2)), result.map { it.first })
+        assertEquals(listOf(listOf(1L, 2L), listOf(1L), listOf(1L, 3L)), result.map { day -> day.second.map { it.eventId } })
+        assertEquals(LocalDate.of(2026, 3, 19), trip.lastDay(zone))
     }
 
     @Test

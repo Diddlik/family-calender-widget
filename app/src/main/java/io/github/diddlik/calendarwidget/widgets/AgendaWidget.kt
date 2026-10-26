@@ -60,14 +60,19 @@ import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.size
 import androidx.glance.layout.width
+import androidx.glance.semantics.contentDescription
+import androidx.glance.semantics.semantics
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import io.github.diddlik.calendarwidget.R
 import io.github.diddlik.calendarwidget.calendar.CalendarSourceRepository
+import io.github.diddlik.calendarwidget.domain.Countdown
 import io.github.diddlik.calendarwidget.domain.EventOccurrence
+import io.github.diddlik.calendarwidget.domain.countdown
 import io.github.diddlik.calendarwidget.domain.groupByDay
 import io.github.diddlik.calendarwidget.domain.isPast
+import io.github.diddlik.calendarwidget.domain.lastDay
 import io.github.diddlik.calendarwidget.domain.parseConventionTitle
 import io.github.diddlik.calendarwidget.domain.selectAgenda
 import io.github.diddlik.calendarwidget.ui.MainActivity
@@ -274,7 +279,8 @@ private fun Message(text: String, onClick: Action) {
 
 private sealed interface AgendaRow {
     data class Day(val date: LocalDate) : AgendaRow
-    data class Event(val event: EventOccurrence) : AgendaRow
+    /** [day] is the by-day section the row appears in; null in the list layout. */
+    data class Event(val event: EventOccurrence, val day: LocalDate?) : AgendaRow
 }
 
 @Composable
@@ -283,27 +289,34 @@ private fun Agenda(context: Context, state: AgendaState.Ready) {
     val byDay = config.layout == WidgetLayout.BY_DAY
     val today = LocalDate.now(state.zone)
     val rows = if (byDay) groupByDay(state.events, state.zone, today).flatMap { (date, events) ->
-        listOf(AgendaRow.Day(date)) + events.map(AgendaRow::Event)
-    } else state.events.map(AgendaRow::Event)
+        listOf(AgendaRow.Day(date)) + events.map { AgendaRow.Event(it, date) }
+    } else state.events.map { AgendaRow.Event(it, null) }
     LazyColumn {
         items(rows, itemId = { row ->
             when (row) {
                 // Negative ids cannot collide with event ids, which are derived from positive ids and timestamps.
                 is AgendaRow.Day -> -1 - row.date.toEpochDay()
-                is AgendaRow.Event -> row.event.eventId * 31 + row.event.begin.toEpochMilli()
+                // A multi-day event appears once per day, so the day is part of its id.
+                is AgendaRow.Event -> (row.event.eventId * 31 + row.event.begin.toEpochMilli()) * 31 + (row.day?.toEpochDay() ?: 0)
             }
         }) { row ->
             when (row) {
                 is AgendaRow.Day -> DayHeader(formatDay(context, row.date, today))
-                is AgendaRow.Event -> EventRow(
-                    context = context,
-                    event = row.event,
-                    time = if (byDay) formatTime(context, row.event, state.zone) else formatWhen(context, row.event, state.zone),
-                    // By-day headers already name the weekday.
-                    weekday = if (byDay) null else formatWeekday(context, row.event, state.zone),
-                    config = config,
-                    past = row.event.isPast(state.now),
-                )
+                is AgendaRow.Event -> {
+                    val event = row.event
+                    val time = if (row.day != null) formatTime(context, event, state.zone, row.day, config.showEndTime)
+                    else formatWhen(context, event, state.zone) + if (config.showEndTime) formatEnd(context, event, state.zone) else ""
+                    val countdown = if (config.showCountdown) countdown(event, state.now, state.zone)?.let { formatCountdown(context, it) } else null
+                    EventRow(
+                        context = context,
+                        event = event,
+                        time = listOfNotNull(time, countdown).joinToString(" · "),
+                        // By-day headers already name the weekday.
+                        weekday = if (byDay) null else formatWeekday(context, event, state.zone),
+                        config = config,
+                        past = event.isPast(state.now),
+                    )
+                }
             }
         }
     }
@@ -322,13 +335,25 @@ private fun DayHeader(text: String) {
 @Composable
 private fun EventRow(context: Context, event: EventOccurrence, time: String, weekday: String?, config: WidgetConfig, past: Boolean) {
     val compact = config.density == WidgetDensity.COMPACT
+    val location = event.location?.trim()?.takeIf { config.showLocation && it.isNotEmpty() }
+    val title = event.title?.takeIf { it.isNotBlank() } ?: context.getString(R.string.event_no_title)
+    // Greying out alone is invisible to screen readers.
+    val description = listOfNotNull(
+        context.getString(R.string.widget_past).takeIf { past }, weekday, time, title, location,
+    ).joinToString(", ")
     Row(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = if (compact) 2.dp else 4.dp)
-            .clickable(actionStartActivity(openEventIntent(event))),
+            .clickable(actionStartActivity(openEventIntent(event)))
+            .semantics { contentDescription = description },
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        val barHeight = when {
+            compact -> 16.dp
+            location != null -> 52.dp
+            else -> 36.dp
+        }
         Box(
-            modifier = GlanceModifier.width(4.dp).height(if (compact) 16.dp else 36.dp).cornerRadius(2.dp)
+            modifier = GlanceModifier.width(4.dp).height(barHeight).cornerRadius(2.dp)
                 .background((event.color?.let { Color(it) } ?: Color.Gray).copy(alpha = if (past) PAST_ALPHA else 1f)),
         ) {}
         Spacer(GlanceModifier.width(8.dp))
@@ -336,13 +361,20 @@ private fun EventRow(context: Context, event: EventOccurrence, time: String, wee
             EventTime(time, weekday)
             Spacer(GlanceModifier.width(8.dp))
             EventTitle(context, event, config, past)
+            if (location != null) EventLocation("  · $location")
         } else {
             Column(modifier = GlanceModifier.fillMaxHeight()) {
                 EventTime(time, weekday)
                 EventTitle(context, event, config, past)
+                if (location != null) EventLocation(location)
             }
         }
     }
+}
+
+@Composable
+private fun EventLocation(text: String) {
+    Text(text = text, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp), maxLines = 1)
 }
 
 @Composable
@@ -396,6 +428,8 @@ private fun EventTitle(context: Context, event: EventOccurrence, config: WidgetC
 
 private fun appLocale(context: Context) = context.resources.configuration.locales[0]
 
+private fun shortTime(context: Context) = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(appLocale(context))
+
 /**
  * Formats in the app's language: a process started in the background keeps the system default
  * locale, while [context] resources follow the per-app language.
@@ -407,9 +441,36 @@ internal fun formatWhen(context: Context, event: EventOccurrence, zone: ZoneId):
     return begin.format(formatter.withLocale(appLocale(context)))
 }
 
-private fun formatTime(context: Context, event: EventOccurrence, zone: ZoneId): String =
-    if (event.allDay) context.getString(R.string.widget_all_day)
-    else event.begin.atZone(zone).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(appLocale(context)))
+/** " – end" for timed events, with the date when the event ends on a later day; empty for all-day events. */
+private fun formatEnd(context: Context, event: EventOccurrence, zone: ZoneId): String {
+    if (event.allDay) return ""
+    val end = event.end.atZone(zone)
+    val formatter = if (end.toLocalDate() == event.begin.atZone(zone).toLocalDate()) shortTime(context)
+    else DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM, FormatStyle.SHORT).withLocale(appLocale(context))
+    return " – " + end.format(formatter)
+}
+
+/** Time for a row under the header of [day]; later days of a multi-day event show until when it lasts. */
+private fun formatTime(context: Context, event: EventOccurrence, zone: ZoneId, day: LocalDate, withEnd: Boolean): String {
+    val begin = event.begin.atZone(zone)
+    return when {
+        event.allDay -> context.getString(R.string.widget_all_day)
+        begin.toLocalDate() < day ->
+            if (event.lastDay(zone) == day) context.getString(R.string.widget_until, event.end.atZone(zone).format(shortTime(context)))
+            else context.getString(R.string.widget_all_day)
+        else -> begin.format(shortTime(context)) + if (withEnd) formatEnd(context, event, zone) else ""
+    }
+}
+
+private fun formatCountdown(context: Context, countdown: Countdown): String {
+    val resources = context.resources
+    return when (countdown) {
+        Countdown.Ongoing -> context.getString(R.string.widget_countdown_now)
+        is Countdown.Minutes -> resources.getQuantityString(R.plurals.widget_countdown_minutes, countdown.value, countdown.value)
+        is Countdown.Hours -> resources.getQuantityString(R.plurals.widget_countdown_hours, countdown.value, countdown.value)
+        is Countdown.Days -> resources.getQuantityString(R.plurals.widget_countdown_days, countdown.value, countdown.value)
+    }
+}
 
 private fun formatWeekday(context: Context, event: EventOccurrence, zone: ZoneId): String {
     val locale = appLocale(context)
@@ -417,6 +478,7 @@ private fun formatWeekday(context: Context, event: EventOccurrence, zone: ZoneId
 }
 
 private fun formatDay(context: Context, date: LocalDate, today: LocalDate): String = when (date) {
+    today.minusDays(1) -> context.getString(R.string.widget_yesterday)
     today -> context.getString(R.string.widget_today)
     today.plusDays(1) -> context.getString(R.string.widget_tomorrow)
     else -> {
