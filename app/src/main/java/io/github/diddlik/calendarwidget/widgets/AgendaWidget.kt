@@ -291,6 +291,8 @@ private fun Agenda(context: Context, state: AgendaState.Ready) {
                     context = context,
                     event = row.event,
                     time = if (byDay) formatTime(context, row.event, state.zone) else formatWhen(context, row.event, state.zone),
+                    // By-day headers already name the weekday.
+                    weekday = if (byDay) null else formatWeekday(context, row.event, state.zone),
                     config = config,
                 )
             }
@@ -309,7 +311,7 @@ private fun DayHeader(text: String) {
 }
 
 @Composable
-private fun EventRow(context: Context, event: EventOccurrence, time: String, config: WidgetConfig) {
+private fun EventRow(context: Context, event: EventOccurrence, time: String, weekday: String?, config: WidgetConfig) {
     val compact = config.density == WidgetDensity.COMPACT
     Row(
         modifier = GlanceModifier.fillMaxWidth().padding(vertical = if (compact) 2.dp else 4.dp)
@@ -322,12 +324,12 @@ private fun EventRow(context: Context, event: EventOccurrence, time: String, con
         ) {}
         Spacer(GlanceModifier.width(8.dp))
         if (compact) {
-            EventTime(time)
+            EventTime(time, weekday)
             Spacer(GlanceModifier.width(8.dp))
             EventTitle(context, event, config)
         } else {
             Column(modifier = GlanceModifier.fillMaxHeight()) {
-                EventTime(time)
+                EventTime(time, weekday)
                 EventTitle(context, event, config)
             }
         }
@@ -335,8 +337,23 @@ private fun EventRow(context: Context, event: EventOccurrence, time: String, con
 }
 
 @Composable
-private fun EventTime(text: String) {
-    Text(text = text, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp), maxLines = 1)
+private fun EventTime(text: String, weekday: String?) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        if (weekday != null) {
+            Box(
+                modifier = GlanceModifier.cornerRadius(4.dp).background(GlanceTheme.colors.secondaryContainer)
+                    .padding(horizontal = 4.dp),
+            ) {
+                Text(
+                    text = weekday,
+                    style = TextStyle(color = GlanceTheme.colors.onSecondaryContainer, fontWeight = FontWeight.Medium, fontSize = 12.sp),
+                    maxLines = 1,
+                )
+            }
+            Spacer(GlanceModifier.width(4.dp))
+        }
+        Text(text = text, style = TextStyle(color = GlanceTheme.colors.onSurfaceVariant, fontSize = 12.sp), maxLines = 1)
+    }
 }
 
 @Composable
@@ -382,6 +399,11 @@ internal fun formatWhen(context: Context, event: EventOccurrence, zone: ZoneId):
 private fun formatTime(context: Context, event: EventOccurrence, zone: ZoneId): String =
     if (event.allDay) context.getString(R.string.widget_all_day)
     else event.begin.atZone(zone).format(DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT).withLocale(appLocale(context)))
+
+private fun formatWeekday(context: Context, event: EventOccurrence, zone: ZoneId): String {
+    val locale = appLocale(context)
+    return event.begin.atZone(zone).format(DateTimeFormatter.ofPattern("EEE", locale))
+}
 
 private fun formatDay(context: Context, date: LocalDate, today: LocalDate): String = when (date) {
     today -> context.getString(R.string.widget_today)

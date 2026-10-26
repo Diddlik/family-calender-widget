@@ -1,3 +1,6 @@
+Neu in 0.7:
+• Wochentag farbig hervorgehoben vor Datum und Uhrzeit
+
 Neu in 0.6:
 • Eigene Farbe für jede Person im Widget
 • Transparenz des Widgets stufenlos von 0 bis 100 %
@@ -5,7 +8,3 @@ Neu in 0.6:
 Neu in 0.5.1:
 • Widgets laden nach einem App-Update wieder sofort, statt sich nur zu drehen
 • Erinnerungen bleiben nach einem Update erhalten
-
-Neu in 0.5:
-• Terminvorlage pro Widget: Stichwort und Personen festlegen
-• Plus im Widget: Person antippen, der Titel wie „Arzt - Anna Vorsorge“ steht schon im Kalender
