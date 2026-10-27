@@ -134,6 +134,9 @@
     <string name="new_event_preview">Titel: %1$s</string>
     <string name="new_event_open">Im Kalender öffnen</string>
     <string name="new_event_failed">Keine Kalender-App gefunden, die Termine anlegen kann.</string>
+    <string name="config_new_event_pick_time">Zuerst Datum und Uhrzeit wählen</string>
+    <string name="new_event_time">Uhrzeit</string>
+    <string name="new_event_pick_ok">OK</string>
     <string name="notification_public_title">Anstehender Termin</string>
 
     <string name="widget_load_failed">Kalender konnten nicht gelesen werden. Tippen, um es erneut zu versuchen.</string>

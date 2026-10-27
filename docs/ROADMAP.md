@@ -17,6 +17,7 @@
 ## 0.3 Quick event creation
 - Done in 0.4.0: plus button in the widget hands creation to the calendar app, which selects the writable calendar.
 - Done in 0.5.0: per-widget new-event template (keyword and people) that prefills the title in the naming convention.
+- Done in 0.10.0: optional date and time picker before handing a new event to the calendar app.
 - Done: editing, recurrence and organizer semantics are left to the calendar app, opened by tapping an event.
 - Open (needs a decision): direct CalendarContract writes behind WRITE_CALENDAR and confirmations, for example to store each person's events in their own calendar; requires privacy policy and Play data safety updates.
 

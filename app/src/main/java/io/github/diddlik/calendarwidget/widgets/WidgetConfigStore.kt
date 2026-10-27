@@ -47,6 +47,8 @@ data class WidgetConfig(
     /** Template for the widget's new-event button: title keyword and the people offered as choices. */
     val newEventKeyword: String = "",
     val people: List<String> = emptyList(),
+    /** The new-event button first asks for date and time and passes them to the calendar app. */
+    val newEventPickTime: Boolean = false,
     /** Name color per person, keyed by the name as entered in [people]; missing names use [accent]. */
     val personColors: Map<String, WidgetAccent> = emptyMap(),
     /** Key in [StoredConfig.profiles] whose filter this widget shares; [filter] then holds a copy of it. */

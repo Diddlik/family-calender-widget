@@ -137,6 +137,7 @@ class WidgetConfigActivity : ComponentActivity() {
         var reminderStyle by remember { mutableStateOf(ReminderStyle.ALERT) }
         var newEventKeyword by remember { mutableStateOf("") }
         var people by remember { mutableStateOf("") }
+        var newEventPickTime by remember { mutableStateOf(false) }
         var personColors by remember { mutableStateOf(emptyMap<String, WidgetAccent>()) }
         var appearance by remember { mutableStateOf(Appearance()) }
         var profileId by remember { mutableStateOf<String?>(null) }
@@ -158,6 +159,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 reminderStyle = existing.reminderStyle
                 newEventKeyword = existing.newEventKeyword
                 people = existing.people.joinToString(", ")
+                newEventPickTime = existing.newEventPickTime
                 personColors = existing.personColors
                 appearance = Appearance(
                     existing.theme, existing.backgroundOpacity, existing.layout, existing.density, existing.accent,
@@ -294,6 +296,7 @@ class WidgetConfigActivity : ComponentActivity() {
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words),
                 modifier = Modifier.fillMaxWidth(),
             )
+            Toggle(R.string.config_new_event_pick_time, newEventPickTime) { newEventPickTime = it }
             val personNames = parsePeople(people)
             personNames.forEach { person ->
                 AccentChoice(person, personColors[person] ?: WidgetAccent.SYSTEM) {
@@ -323,6 +326,7 @@ class WidgetConfigActivity : ComponentActivity() {
                         reminderStyle = reminderStyle,
                         newEventKeyword = newEventKeyword.trim(),
                         people = personNames,
+                        newEventPickTime = newEventPickTime,
                         // Colors of removed names would otherwise linger in the stored configuration.
                         personColors = personColors.filterKeys { it in personNames },
                         theme = appearance.theme,

@@ -26,6 +26,7 @@ class WidgetConfigTest {
         assertEquals(ReminderStyle.ALERT, config.reminderStyle)
         assertEquals("", config.newEventKeyword)
         assertEquals(emptyList<String>(), config.people)
+        assertEquals(false, config.newEventPickTime)
         assertEquals(emptyMap<String, WidgetAccent>(), config.personColors)
     }
 
@@ -46,7 +47,7 @@ class WidgetConfigTest {
         val config = WidgetConfig(calendarIds = setOf(2), name = "Arzttermine", useNamingConvention = true, reminderMinutes = setOf(60, 1440),
             theme = WidgetTheme.DARK, backgroundOpacity = 50, layout = WidgetLayout.BY_DAY, density = WidgetDensity.COMPACT,
             accent = WidgetAccent.GREEN, reminderStyle = ReminderStyle.SILENT,
-            newEventKeyword = "Arzt", people = listOf("Anna", "Ben"),
+            newEventKeyword = "Arzt", people = listOf("Anna", "Ben"), newEventPickTime = true,
         )
         assertEquals(config, Json.decodeFromString<WidgetConfig>(Json.encodeToString(config)))
     }

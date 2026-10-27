@@ -136,7 +136,7 @@ class AgendaWidget : GlanceAppWidget() {
                 val config = current.config
                 val newEvent = when {
                     !canCreate -> null
-                    config != null && (config.newEventKeyword.isNotBlank() || config.people.isNotEmpty()) -> newEventFromTemplate
+                    config != null && (config.newEventKeyword.isNotBlank() || config.people.isNotEmpty() || config.newEventPickTime) -> newEventFromTemplate
                     else -> actionStartActivity(newEventIntent())
                 }
                 Content(context, current, configure, newEvent, background)
@@ -488,13 +488,18 @@ private fun formatDay(context: Context, date: LocalDate, today: LocalDate): Stri
 }
 
 /**
- * Hands event creation to the user's calendar app, which picks the calendar and the start time.
+ * Hands event creation to the user's calendar app, which picks the calendar and, without [begin], the start time.
  * The app itself never writes to calendars, so it needs no WRITE_CALENDAR permission.
  */
-internal fun newEventIntent(title: String? = null, calendarId: Long? = null): Intent =
+internal fun newEventIntent(title: String? = null, calendarId: Long? = null, begin: Instant? = null): Intent =
     Intent(Intent.ACTION_INSERT, CalendarContract.Events.CONTENT_URI).apply {
         title?.let { putExtra(CalendarContract.Events.TITLE, it) }
         calendarId?.let { putExtra(CalendarContract.Events.CALENDAR_ID, it) }
+        begin?.let {
+            putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, it.toEpochMilli())
+            // Some calendar apps ignore a start without an end; one hour is a common default length.
+            putExtra(CalendarContract.EXTRA_EVENT_END_TIME, it.plus(Duration.ofHours(1)).toEpochMilli())
+        }
     }
 
 /** Opens the occurrence in the user's calendar app; begin/end select the specific recurrence. */

@@ -1,3 +1,6 @@
+New in 0.10:
+• New event: optionally choose date and time first
+
 New in 0.9:
 • Optionally show time until the event, end time and location
 • Multi-day events appear on each day in "By day"

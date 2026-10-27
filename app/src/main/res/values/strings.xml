@@ -136,6 +136,9 @@
     <string name="new_event_preview">Title: %1$s</string>
     <string name="new_event_open">Open calendar</string>
     <string name="new_event_failed">No calendar app found that can create events.</string>
+    <string name="config_new_event_pick_time">Choose date and time first</string>
+    <string name="new_event_time">Time</string>
+    <string name="new_event_pick_ok">OK</string>
     <string name="notification_public_title">Upcoming event</string>
 
     <string name="widget_load_failed">Could not read your calendars. Tap to try again.</string>
